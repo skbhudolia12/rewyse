@@ -50,7 +50,20 @@ The product's reason to exist is one testable hypothesis: **a seller facing a mo
 
 # Phase 0 — Foundation ✅ Complete
 
-**33 tests passing · typecheck clean · lint clean**
+**33 unit tests · 20 RLS integration tests · typecheck clean · lint clean · build clean · database live**
+
+### Verified end to end
+
+| Check | Command | Result |
+|---|---|---|
+| Migrations applied | `npm run db:migrate` | 3/3, transactional, checksum-tracked |
+| Schema + functions | `npm run check:db` | 17 tables, 4 RPC helpers, seed present |
+| Security model | `npm run test:integration` | 20/20 — see below |
+| Pricing rails | `npm test` | 33/33 |
+| Production build | `npm run build` | compiles, no warnings |
+| Auth gate | `GET /home` | `307 → /login?next=%2Fhome` |
+
+RLS is proven against the live database rather than inferred: anonymous reads blocked on every private table; an unverified user cannot browse or create listings; a verified user sees another campus **in their own cluster** but not a different cluster's; non-parties cannot read or inject into a conversation; ID documents never leak to a peer; and a student cannot write their own `role`, `trust_score`, or `id_review_status`.
 
 ### Scaffold
 - Next.js 16.3.5, React 19.2.8, Tailwind 4, Turbopack
@@ -73,7 +86,7 @@ The product's reason to exist is one testable hypothesis: **a seller facing a mo
 
 `0003_rls.sql` — Row Level Security on all 17 tables. Revoke-all-then-grant-explicitly, plus column-level grants so a student can edit their name and move-out date but never their own role, verification state, trust score, or ban status.
 
-`seed.sql` — Delhi cluster, 3 campuses, domain allow-list, 9 meetup points, 10 seed comparables.
+Seed data lives in `scripts/seed.mjs` (`npm run seed`) rather than SQL — idempotent upserts with fixed UUIDs, re-runnable without duplicating rows. Migrations stay SQL; seed data does not, so there is one source of truth for it.
 
 ### Pricing rails — `src/lib/pricing/`
 Pure functions, zero dependencies, 33 tests. The LLM will only ever supply `baseValue`; the urgency curve, condition multiplier, category clamps and rounding all live in tested code. Covers the urgency curve at 0/3/7/12/14/21/60 days, condition multipliers, hallucination clamps, every fallback path, outcome classification, and badge thresholds.

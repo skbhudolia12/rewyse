@@ -11,7 +11,12 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "check:db": "node scripts/check-db.mjs",
+    "seed": "node scripts/seed.mjs",
+    "db:migrate": "node scripts/migrate.mjs",
+    "db:status": "node scripts/migrate.mjs --status",
+    "test:integration": "vitest run --config vitest.integration.mts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
@@ -20,6 +25,7 @@
     "date-fns": "^4.4.0",
     "lucide-react": "^1.45.0",
     "next": "16.3.5",
+    "pg": "^8.23.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "server-only": "^0.0.1",
