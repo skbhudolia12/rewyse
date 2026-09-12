@@ -52,10 +52,10 @@ export function ReviewCard({ review }: { review: PendingReview }) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate font-medium">{review.fullName}</p>
-          <p className="truncate text-sm text-[var(--muted)]">{review.email}</p>
-          {review.hostel && <p className="truncate text-xs text-[var(--muted)]">{review.hostel}</p>}
+          <p className="truncate text-sm text-paper-dim">{review.email}</p>
+          {review.hostel && <p className="truncate text-xs text-paper-dim">{review.hostel}</p>}
         </div>
-        <Badge tone="brand">{review.campus}</Badge>
+        <Badge tone="neutral">{review.campus}</Badge>
       </div>
 
       {review.documentUrl ? (
@@ -64,9 +64,9 @@ export function ReviewCard({ review }: { review: PendingReview }) {
           <img
             src={review.documentUrl}
             alt={`Student ID submitted by ${review.fullName}`}
-            className="border-border max-h-72 w-full rounded-xl border object-contain"
+            className="border-hairline max-h-72 w-full rounded-xl border object-contain"
           />
-          <span className="mt-1 block text-xs text-[var(--muted)]">Tap to open full size</span>
+          <span className="mt-1 block text-xs text-paper-dim">Tap to open full size</span>
         </a>
       ) : (
         <Alert tone="error">
@@ -74,7 +74,7 @@ export function ReviewCard({ review }: { review: PendingReview }) {
         </Alert>
       )}
 
-      <p className="text-xs text-[var(--muted)]">
+      <p className="text-xs text-paper-dim">
         Check the name matches, the college is right, and the card looks like a real ID. This is
         screening, not forensics — when genuinely unsure, reject with a reason and ask again.
       </p>

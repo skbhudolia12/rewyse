@@ -1,0 +1,164 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: #0a0a0b; color: #f4f1ec;
+      font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: #ff5a1f; text-decoration: none; }
+    a:hover { color: #ff7a45; }
+    .display {
+      font-family: 'Bricolage Grotesque', 'Instrument Sans', system-ui, sans-serif;
+      font-weight: 800; letter-spacing: -0.045em; line-height: 0.9;
+    }
+    .grid-paper {
+      background-image:
+        linear-gradient(rgba(244,241,236,0.12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(244,241,236,0.12) 1px, transparent 1px);
+      background-size: 44px 44px;
+    }
+    .pulse { animation: pulse 2.4s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .5 } }
+    .chip {
+      border: 1px solid rgba(244,241,236,0.2); border-radius: 999px;
+      padding: 9px 15px; font-size: 13px; font-weight: 500; color: #cfcac1;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .chip-on { background: #f4f1ec; color: #0a0a0b; border-color: #f4f1ec; font-weight: 600; }
+  </style>
+</helmet>
+
+<div class="grid-paper" style="width: 390px; min-height: 844px; background-color: #0a0a0b; display: flex; flex-direction: column;">
+
+  <!-- header. No fake status bar: the real one paints on top. -->
+  <header style="padding: 14px 20px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(244,241,236,0.12);">
+    <div style="display: flex; align-items: center; gap: 8px; border: 1px solid rgba(244,241,236,0.22); border-radius: 999px; padding: 7px 13px;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ff5a1f" stroke-width="2.4" stroke-linecap="round"><path d="M12 21s-7-5.5-7-11a7 7 0 1 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+      <span style="font-size: 12.5px; font-weight: 500;">Delhi Cluster</span>
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#cfcac1" stroke-width="2.6" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <div style="position: relative;">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#cfcac1" stroke-width="2" stroke-linecap="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        <span style="position: absolute; top: -2px; right: -2px; width: 7px; height: 7px; border-radius: 50%; background: #ff5a1f;"></span>
+      </div>
+      <div style="width: 30px; height: 30px; border-radius: 50%; background: #f4f1ec; color: #0a0a0b; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12.5px;">S</div>
+    </div>
+  </header>
+
+  <div style="flex: 1; padding: 18px 20px 0;">
+    <!-- search -->
+    <div style="display: flex; align-items: center; gap: 10px; border: 1px solid rgba(244,241,236,0.2); border-radius: 14px; padding: 13px 15px; margin-bottom: 24px;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#cfcac1" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <span style="font-size: 14px; color: #7d7970;">Search your cluster…</span>
+    </div>
+
+    <!-- clearance -->
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+      <span class="pulse" style="width: 7px; height: 7px; border-radius: 50%; background: #ff5a1f; display: inline-block;"></span>
+      <h2 class="display" style="font-size: 21px; margin: 0;">Move-out clearance</h2>
+    </div>
+
+    <div style="display: flex; gap: 12px; overflow: hidden; margin-bottom: 26px;">
+      <div style="width: 168px; flex-shrink: 0; border: 1px solid rgba(255,90,31,0.4); border-radius: 16px; overflow: hidden; background: linear-gradient(160deg, rgba(255,90,31,0.12), rgba(244,241,236,0.02));">
+        <div style="height: 96px; display: flex; align-items: center; justify-content: center; position: relative; border-bottom: 1px solid rgba(255,90,31,0.22);">
+          <svg width="58" height="56" viewBox="0 0 80 76" fill="none" stroke="#ff5a1f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="22" y="8" width="36" height="58" rx="4"/><path d="M22 30h36M50 18v8M50 38v8"/></svg>
+          <span style="position: absolute; top: 9px; left: 9px; background: #ff5a1f; color: #0a0a0b; font-size: 10px; font-weight: 700; padding: 4px 9px; border-radius: 999px;">3 DAYS</span>
+        </div>
+        <div style="padding: 12px 13px 14px;">
+          <div style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">Mini fridge, 45L</div>
+          <div style="display: flex; align-items: baseline; gap: 7px;">
+            <span class="display" style="font-size: 19px; color: #ff5a1f;">₹4,200</span>
+            <span style="font-size: 11.5px; color: #7d7970; text-decoration: line-through;">₹5,800</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="width: 168px; flex-shrink: 0; border: 1px solid rgba(255,90,31,0.4); border-radius: 16px; overflow: hidden; background: linear-gradient(160deg, rgba(255,90,31,0.12), rgba(244,241,236,0.02));">
+        <div style="height: 96px; display: flex; align-items: center; justify-content: center; position: relative; border-bottom: 1px solid rgba(255,90,31,0.22);">
+          <svg width="58" height="56" viewBox="0 0 80 76" fill="none" stroke="#ff5a1f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="12" width="64" height="42" rx="3"/><path d="M32 54v8h16v-8M28 62h24"/></svg>
+          <span style="position: absolute; top: 9px; left: 9px; background: #ff5a1f; color: #0a0a0b; font-size: 10px; font-weight: 700; padding: 4px 9px; border-radius: 999px;">6 DAYS</span>
+        </div>
+        <div style="padding: 12px 13px 14px;">
+          <div style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">Dell 24&quot; Monitor</div>
+          <div style="display: flex; align-items: baseline; gap: 7px;">
+            <span class="display" style="font-size: 19px; color: #ff5a1f;">₹3,750</span>
+            <span style="font-size: 11.5px; color: #7d7970; text-decoration: line-through;">₹5,100</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- categories -->
+    <div style="display: flex; gap: 8px; overflow: hidden; margin-bottom: 20px;">
+      <span class="chip chip-on">Everything</span>
+      <span class="chip">Electronics</span>
+      <span class="chip">Furniture</span>
+      <span class="chip">Books</span>
+    </div>
+
+    <!-- grid -->
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+      <div style="border: 1px solid rgba(244,241,236,0.16); border-radius: 16px; overflow: hidden; background: rgba(244,241,236,0.03);">
+        <div style="height: 108px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(244,241,236,0.12);">
+          <svg width="62" height="58" viewBox="0 0 80 76" fill="none" stroke="#ff5a1f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 26h68M12 26v34M68 26v34M12 40h56"/></svg>
+        </div>
+        <div style="padding: 12px 13px 14px;">
+          <div class="display" style="font-size: 20px; margin-bottom: 5px;">₹1,900</div>
+          <div style="font-size: 12.5px; font-weight: 500; margin-bottom: 8px;">Study table</div>
+          <div style="font-size: 11px; color: #cfcac1;">✓ IIITD · 12 days left</div>
+        </div>
+      </div>
+
+      <div style="border: 1px solid rgba(244,241,236,0.16); border-radius: 16px; overflow: hidden; background: rgba(244,241,236,0.03);">
+        <div style="height: 108px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(244,241,236,0.12);">
+          <svg width="62" height="58" viewBox="0 0 80 76" fill="none" stroke="#ff5a1f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M24 14h32v22H24zM26 36v24M54 36v24M20 44h40"/></svg>
+        </div>
+        <div style="padding: 12px 13px 14px;">
+          <div class="display" style="font-size: 20px; margin-bottom: 5px;">₹1,450</div>
+          <div style="font-size: 12.5px; font-weight: 500; margin-bottom: 8px;">Study chair</div>
+          <div style="font-size: 11px; color: #cfcac1;">✓ DTU · 9 days left</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- bottom nav -->
+  <nav style="border-top: 1px solid rgba(244,241,236,0.14); background: rgba(10,10,11,0.95); display: flex; padding: 10px 0 22px;">
+    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#ff5a1f" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V21H3z"/></svg>
+      <span style="font-size: 10px; color: #ff5a1f; font-weight: 600;">Home</span>
+    </div>
+    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#7d7970" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <span style="font-size: 10px; color: #7d7970;">Explore</span>
+    </div>
+    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+      <div style="width: 42px; height: 30px; border-radius: 999px; background: #ff5a1f; display: flex; align-items: center; justify-content: center; margin-top: -2px;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0a0a0b" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </div>
+      <span style="font-size: 10px; color: #cfcac1;">Sell</span>
+    </div>
+    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#7d7970" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8 8 0 0 1-11.6 7.2L3 21l2.3-6.4A8 8 0 1 1 21 11.5z"/></svg>
+      <span style="font-size: 10px; color: #7d7970;">Messages</span>
+    </div>
+    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#7d7970" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+      <span style="font-size: 10px; color: #7d7970;">Profile</span>
+    </div>
+  </nav>
+</div>
+</x-dc>
+</body>
+</html>

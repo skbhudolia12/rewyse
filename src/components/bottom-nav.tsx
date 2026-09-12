@@ -22,7 +22,7 @@ export function BottomNav({ isAdmin }: { isAdmin: boolean }) {
   return (
     <nav
       aria-label="Main"
-      className="border-border bg-surface/95 fixed inset-x-0 bottom-0 z-40 border-t backdrop-blur"
+      className="border-hairline bg-surface/95 fixed inset-x-0 bottom-0 z-40 border-t backdrop-blur"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
       <ul className="mx-auto flex max-w-md">
@@ -35,7 +35,7 @@ export function BottomNav({ isAdmin }: { isAdmin: boolean }) {
                 aria-current={active ? 'page' : undefined}
                 className={cn(
                   'flex min-h-16 flex-col items-center justify-center gap-0.5 text-[10px] font-medium',
-                  active ? 'text-brand-600' : 'text-[var(--muted)]',
+                  active ? 'text-flame' : 'text-paper-dim',
                 )}
               >
                 <Icon className="size-5" strokeWidth={active ? 2.4 : 1.8} />

@@ -7,7 +7,7 @@ export default function BannedPage() {
         title="Account suspended"
         subtitle="This account can no longer buy or sell on ReWyse."
       />
-      <p className="mt-4 text-sm text-[var(--muted)]">
+      <p className="mt-4 text-sm text-paper-dim">
         If you think this is a mistake, email the ReWyse team from your college address.
       </p>
     </main>

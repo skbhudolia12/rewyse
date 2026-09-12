@@ -40,3 +40,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 !.env.example
+
+# Seeded design canvas: a build artifact of design/*.dc.html, ~2MB of
+# bundled editor code. Re-seed it rather than versioning it.
+design/rewyse-ui-direction.html

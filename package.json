@@ -17,7 +17,8 @@
     "db:migrate": "node scripts/migrate.mjs",
     "db:status": "node scripts/migrate.mjs --status",
     "test:integration": "vitest run --config vitest.integration.mts",
-    "make-admin": "node scripts/make-admin.mjs"
+    "make-admin": "node scripts/make-admin.mjs",
+    "check:llm": "node scripts/check-llm.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

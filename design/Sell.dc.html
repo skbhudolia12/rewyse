@@ -1,0 +1,285 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: #0a0a0b; color: #f4f1ec;
+      font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: #ff5a1f; text-decoration: none; }
+    a:hover { color: #ff7a45; }
+    .display {
+      font-family: 'Bricolage Grotesque', 'Instrument Sans', system-ui, sans-serif;
+      font-weight: 800; letter-spacing: -0.045em; line-height: 0.9;
+    }
+    .grid-paper {
+      background-image:
+        linear-gradient(rgba(244,241,236,0.14) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(244,241,236,0.14) 1px, transparent 1px);
+      background-size: 56px 56px;
+    }
+    .seg {
+      cursor: pointer; transition: background .22s, color .22s, border-color .22s;
+      border: 1px solid rgba(244,241,236,0.2); border-radius: 12px;
+      padding: 13px 16px; font-size: 14.5px; font-weight: 500; text-align: center;
+      color: #cfcac1; background: transparent;
+      font-family: inherit;
+    }
+    .seg:hover { border-color: rgba(244,241,236,0.45); color: #f4f1ec; }
+    .seg-on { background: #f4f1ec; color: #0a0a0b; border-color: #f4f1ec; font-weight: 600; }
+    .seg-on:hover { color: #0a0a0b; }
+    /* Range: the single control the whole panel reacts to. */
+    input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; background: transparent; }
+    input[type=range]::-webkit-slider-runnable-track {
+      height: 6px; border-radius: 999px;
+      background: linear-gradient(90deg, #ff5a1f 0%, #ff5a1f var(--pct, 50%), rgba(244,241,236,0.16) var(--pct, 50%));
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none; width: 26px; height: 26px; margin-top: -10px;
+      border-radius: 50%; background: #ff5a1f; border: 4px solid #0a0a0b;
+      box-shadow: 0 0 0 1px rgba(255,90,31,.6), 0 6px 18px rgba(255,90,31,.4); cursor: grab;
+    }
+    input[type=range]::-webkit-slider-thumb:active { cursor: grabbing; }
+    input[type=range]::-moz-range-track { height: 6px; border-radius: 999px; background: rgba(244,241,236,0.16); }
+    input[type=range]::-moz-range-progress { height: 6px; border-radius: 999px; background: #ff5a1f; }
+    input[type=range]::-moz-range-thumb {
+      width: 18px; height: 18px; border-radius: 50%; background: #ff5a1f; border: 4px solid #0a0a0b; cursor: grab;
+    }
+    .price-num { transition: color .3s; }
+    .pulse { animation: pulse 2.6s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .55 } }
+    .lift { transition: transform .3s cubic-bezier(.2,.7,.3,1), border-color .3s; }
+    .lift:hover { transform: translateY(-3px); }
+  </style>
+</helmet>
+
+<div class="grid-paper" style="width: 1440px; min-height: 1000px; background-color: #0a0a0b;">
+
+  <!-- top bar -->
+  <nav style="display: flex; align-items: center; justify-content: space-between; padding: 22px 56px; border-bottom: 1px solid rgba(244,241,236,0.14);">
+    <div style="display: flex; align-items: center; gap: 30px;">
+      <div style="display: flex; align-items: baseline; gap: 9px;">
+        <span class="display" style="font-size: 22px; letter-spacing: -0.06em;">ReWyse</span>
+        <span style="width: 6px; height: 6px; border-radius: 50%; background: #ff5a1f; display: inline-block;"></span>
+      </div>
+      <span style="font-size: 14px; color: #cfcac1;">New listing</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="font-size: 13px; color: #cfcac1;">Step 2 of 3</span>
+      <div style="display: flex; gap: 5px;">
+        <span style="width: 34px; height: 4px; border-radius: 999px; background: #ff5a1f;"></span>
+        <span style="width: 34px; height: 4px; border-radius: 999px; background: #ff5a1f;"></span>
+        <span style="width: 34px; height: 4px; border-radius: 999px; background: rgba(244,241,236,0.2);"></span>
+      </div>
+    </div>
+  </nav>
+
+  <div style="display: grid; grid-template-columns: 1fr 476px; gap: 0; align-items: start;">
+
+    <!-- form -->
+    <div style="padding: 58px 56px 70px;">
+      <h1 class="display" style="font-size: 52px; margin: 0 0 12px;">Pricing &amp; timing</h1>
+      <p style="font-size: 16.5px; color: #cfcac1; margin: 0 0 46px; max-width: 460px; line-height: 1.55;">
+        The closer your move-out date, the lower we suggest going. Drag it and watch.
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 38px; max-width: 560px;">
+
+        <div>
+          <label style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px;">Does it work?</label>
+          <p style="font-size: 13.5px; color: #cfcac1; margin: 0 0 14px;">Be honest — buyers ask, and a surprise at handover kills the sale.</p>
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;">
+            <button class="seg {{cond.fullClass}}" onClick="{{cond.pickFull}}">Fully working</button>
+            <button class="seg {{cond.partClass}}" onClick="{{cond.pickPart}}">Partly working</button>
+            <button class="seg {{cond.partsClass}}" onClick="{{cond.pickParts}}">For parts</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px;">Cosmetic condition</label>
+          <p style="font-size: 13.5px; color: #cfcac1; margin: 0 0 14px;">Scuffs, dents, anything visible.</p>
+          <div style="border: 1px solid rgba(244,241,236,0.2); border-radius: 12px; padding: 14px 16px; font-size: 15px; color: #f4f1ec;">
+            Minor scuffs on the base, screen is clean
+          </div>
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px;">What&rsquo;s included?</label>
+          <div style="border: 1px solid rgba(244,241,236,0.2); border-radius: 12px; padding: 14px 16px; font-size: 15px; color: #f4f1ec; margin-top: 14px;">
+            Charger + HDMI cable
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid rgba(244,241,236,0.14); padding-top: 34px;">
+          <label style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px;">When are you vacating your room?</label>
+          <p style="font-size: 13.5px; color: #cfcac1; margin: 0 0 26px;">This is the lever. Everything on the right moves with it.</p>
+
+          <div style="display: flex; align-items: baseline; gap: 14px; margin-bottom: 22px;">
+            <span class="display price-num" style="font-size: 64px; color: {{urgencyColor}};">{{days}}</span>
+            <span style="font-size: 15px; color: #cfcac1; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;">days away</span>
+          </div>
+
+          <input type="range" min="0" max="30" value="{{days}}" onInput="{{setDays}}" style="--pct: {{pct}};">
+          <div style="display: flex; justify-content: space-between; margin-top: 12px; font-size: 12.5px; color: #cfcac1;">
+            <span>Today</span>
+            <span>2 weeks</span>
+            <span>30 days</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- live pricing panel -->
+    <aside style="border-left: 1px solid rgba(244,241,236,0.14); min-height: 900px; padding: 58px 48px 70px; background: rgba(244,241,236,0.025);">
+
+      <div style="display: inline-flex; align-items: center; gap: 9px; border: 1px solid rgba(255,90,31,0.4); background: rgba(255,90,31,0.1); border-radius: 999px; padding: 7px 14px; font-size: 12px; font-weight: 600; color: #ff8a52; letter-spacing: 0.04em; margin-bottom: 30px;">
+        <span class="pulse" style="width: 6px; height: 6px; border-radius: 50%; background: #ff5a1f; display: inline-block;"></span>
+        SMART PRICE · LIVE
+      </div>
+
+      <div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #cfcac1; font-weight: 600;">Fair market range</div>
+      <div class="display" style="font-size: 42px; margin: 12px 0 8px;">{{fairRange}}</div>
+      <p style="font-size: 13px; color: #cfcac1; margin: 0 0 34px;">{{comparableNote}}</p>
+
+      <div style="border: 1px solid {{urgencyBorder}}; background: {{urgencyBg}}; border-radius: 18px; padding: 26px 24px; transition: border-color .35s, background .35s;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+          <span style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #cfcac1; font-weight: 600;">Sell before move-out</span>
+          <span style="font-size: 11.5px; font-weight: 600; color: {{urgencyColor}};">{{urgencyLabel}}</span>
+        </div>
+        <div class="display price-num" style="font-size: 62px; color: {{urgencyColor}};">{{sellFast}}</div>
+        <div style="font-size: 13.5px; color: #cfcac1; margin-top: 10px;">{{sellFastCaption}}</div>
+
+        <div style="height: 5px; border-radius: 999px; background: rgba(244,241,236,0.12); overflow: hidden; margin-top: 22px;">
+          <div style="width: {{discountPct}}; height: 100%; background: {{urgencyColor}}; transition: width .35s cubic-bezier(.2,.7,.3,1);"></div>
+        </div>
+        <div style="font-size: 12px; color: #cfcac1; margin-top: 10px;">{{discountNote}}</div>
+      </div>
+
+      <div style="margin-top: 34px;">
+        <label style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 12px;">Set your asking price</label>
+        <div style="display: flex; align-items: center; border: 1px solid rgba(244,241,236,0.24); border-radius: 14px; padding: 0 18px; height: 62px;">
+          <span class="display" style="font-size: 24px; color: #cfcac1; margin-right: 6px;">₹</span>
+          <span class="display" style="font-size: 30px;">{{askValue}}</span>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 12px;">
+          <button class="seg" onClick="{{takeSellFast}}" style="flex: 1;">Use sell-fast price</button>
+          <button class="seg" onClick="{{takeFairMin}}" style="flex: 1;">Use fair range</button>
+        </div>
+        <div style="margin-top: 18px; display: inline-flex; align-items: center; gap: 8px; background: rgba(255,90,31,0.14); color: #ff8a52; border-radius: 999px; padding: 9px 15px; font-size: 12.5px; font-weight: 600;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.09 13.36A1 1 0 0 0 4.87 15H11l-1 7 8.91-11.36A1 1 0 0 0 18.13 9H12z"/></svg>
+          {{liquidityLabel}}
+        </div>
+      </div>
+
+      <details style="margin-top: 34px; border-top: 1px solid rgba(244,241,236,0.14); padding-top: 22px;">
+        <summary style="cursor: pointer; font-size: 13.5px; color: #cfcac1; list-style: none;">How we got this number ↓</summary>
+        <div style="font-size: 13px; color: #cfcac1; line-height: 1.7; margin-top: 14px;">
+          <div style="display: flex; justify-content: space-between;"><span>Comparable base value</span><span style="color: #f4f1ec;">{{baseValue}}</span></div>
+          <div style="display: flex; justify-content: space-between;"><span>Condition</span><span style="color: #f4f1ec;">{{condMult}}</span></div>
+          <div style="display: flex; justify-content: space-between;"><span>Urgency ({{days}} days)</span><span style="color: #f4f1ec;">{{urgencyMult}}</span></div>
+        </div>
+      </details>
+    </aside>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"baseValue":{"editor":"int","default":7500,"min":500,"max":60000,"step":250,"unit":"₹","section":"Item"},"startDays":{"editor":"range","default":6,"min":0,"max":30,"step":1,"unit":"days","section":"Item"}}'>
+/**
+ * Runs the real pricing rails from src/lib/pricing/rails.ts so the mockup
+ * demonstrates the actual product logic rather than illustrating it. Keep these
+ * constants in step with constants.ts if they change.
+ */
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { days: null, cond: 'full', ask: null };
+  }
+
+  get days() {
+    return this.state.days ?? this.props.startDays ?? 6;
+  }
+
+  round50(v) { return Math.max(50, Math.round(v / 50) * 50); }
+  inr(v) { return '₹' + v.toLocaleString('en-IN'); }
+
+  quote() {
+    const base = this.props.baseValue ?? 7500;
+    const mult = { full: 1, part: 0.6, parts: 0.3 }[this.state.cond] ?? 1;
+    const urgency = Math.min(Math.max(this.days / 21, 0.6), 1);
+    const adjusted = base * mult;
+    const fairMin = this.round50(adjusted * 0.85);
+    const fairMax = Math.max(this.round50(adjusted * 1.05), fairMin + 50);
+    const sellFast = Math.min(this.round50(adjusted * 0.85 * urgency), fairMin);
+    return { base, mult, urgency, fairMin, fairMax, sellFast };
+  }
+
+  renderVals() {
+    const q = this.quote();
+    const d = this.days;
+    const ask = this.state.ask ?? q.sellFast;
+
+    // Orange is reserved for time pressure, so it only appears as the date closes in.
+    const critical = d <= 3;
+    const soon = d <= 10;
+    const color = critical ? '#ff5a1f' : soon ? '#ffa11f' : '#f4f1ec';
+
+    const saved = q.fairMin - q.sellFast;
+    const pctOff = q.fairMin > 0 ? Math.round((saved / q.fairMin) * 100) : 0;
+
+    const pick = (c) => () => this.setState({ cond: c, ask: null });
+    const on = (c) => (this.state.cond === c ? 'seg-on' : '');
+
+    return {
+      days: String(d),
+      pct: Math.round((d / 30) * 100) + '%',
+
+      cond: {
+        fullClass: on('full'), partClass: on('part'), partsClass: on('parts'),
+        pickFull: pick('full'), pickPart: pick('part'), pickParts: pick('parts'),
+      },
+      setDays: (e) => this.setState({ days: Number(e.target.value), ask: null }),
+
+      fairRange: this.inr(q.fairMin) + ' – ' + this.inr(q.fairMax),
+      comparableNote: 'Based on 6 recent sales in the Delhi cluster',
+
+      sellFast: this.inr(q.sellFast),
+      sellFastCaption: critical
+        ? 'Priced to go today. Expect messages within hours.'
+        : soon
+          ? 'Estimated sale within 48 hours.'
+          : 'You have room to hold out for the fair range.',
+
+      urgencyColor: color,
+      urgencyBorder: critical ? 'rgba(255,90,31,0.5)' : 'rgba(244,241,236,0.18)',
+      urgencyBg: critical ? 'rgba(255,90,31,0.08)' : 'rgba(244,241,236,0.03)',
+      urgencyLabel: critical ? 'MOVING OUT NOW' : soon ? 'CLOSING IN' : 'PLENTY OF TIME',
+
+      discountPct: Math.min(100, pctOff * 2.5) + '%',
+      discountNote: pctOff > 0
+        ? pctOff + '% below the fair minimum to move it fast'
+        : 'No discount needed at this range',
+
+      askValue: ask.toLocaleString('en-IN'),
+      takeSellFast: () => this.setState({ ask: q.sellFast }),
+      takeFairMin: () => this.setState({ ask: q.fairMin }),
+      liquidityLabel: ask <= q.sellFast ? 'High liquidity — sells fastest' : 'Above the fast-sale price',
+
+      baseValue: this.inr(q.base),
+      condMult: '×' + q.mult.toFixed(2),
+      urgencyMult: '×' + q.urgency.toFixed(2),
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -27,13 +27,13 @@ export function SignInForm({
   if (state.sentTo) {
     return (
       <div className="space-y-4">
-        <div className="bg-brand-100 text-brand-700 flex size-14 items-center justify-center rounded-2xl">
+        <div className="bg-flame-soft text-flame-bright flex size-14 items-center justify-center rounded-2xl">
           <MailCheck className="size-7" />
         </div>
         <div className="space-y-1.5">
           <h2 className="text-xl font-semibold">Check your inbox</h2>
-          <p className="text-sm text-[var(--muted)]">
-            We sent a sign-in link to <span className="text-[var(--foreground)]">{state.sentTo}</span>
+          <p className="text-sm text-paper-dim">
+            We sent a sign-in link to <span className="text-paper">{state.sentTo}</span>
             . Open it on this device to continue.
           </p>
         </div>
@@ -67,7 +67,7 @@ export function SignInForm({
         />
       </Field>
       <SubmitButton label={submitLabel} />
-      <p className="text-center text-xs text-[var(--muted)]">
+      <p className="text-center text-xs text-paper-dim">
         We will email you a link. No password to remember.
       </p>
     </form>

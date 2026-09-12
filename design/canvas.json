@@ -1,0 +1,40 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1440, "h": 2720, "title": "Landing — desktop" },
+    { "file": "Feed.dc.html", "x": 1600, "y": 0, "w": 1440, "h": 1260, "title": "Browse feed — desktop", "is_interactive": true },
+    { "file": "Listing.dc.html", "x": 3200, "y": 0, "w": 1440, "h": 1160, "title": "Listing detail — desktop" },
+    { "file": "Sell.dc.html", "x": 4800, "y": 0, "w": 1440, "h": 1100, "title": "Smart Price — desktop", "is_interactive": true },
+    { "file": "Mobile.dc.html", "x": 6400, "y": 0, "w": 390, "h": 844, "title": "Feed — mobile" }
+  ],
+  "annotations": [
+    {
+      "id": "direction",
+      "x": 0,
+      "y": -190,
+      "w": 560,
+      "text": "DIRECTION — \"Move-out season\"\n\nOrange means one thing only: time running out. It appears on countdowns, clearance and the sell-fast price, nowhere else. Everything else is near-black + warm off-white.\n\nType: Bricolage Grotesque (display) / Instrument Sans (body). Graph-paper grid = campus notebook. Item art is line-drawn, not stock photos."
+    },
+    {
+      "id": "feed-note",
+      "x": 1600,
+      "y": -190,
+      "w": 460,
+      "text": "INTERACTIVE — click the category chips, they really filter the grid. Cards lift and the line art tilts on hover."
+    },
+    {
+      "id": "sell-note",
+      "x": 4800,
+      "y": -190,
+      "w": 520,
+      "text": "INTERACTIVE — drag the move-out slider.\n\nThis runs the REAL formula from src/lib/pricing/rails.ts, not a fake. Watch the panel go from off-white to amber to orange as the date closes in, and open \"How we got this number\" to see the multipliers."
+    },
+    {
+      "id": "mobile-note",
+      "x": 6400,
+      "y": -190,
+      "w": 390,
+      "text": "Mobile comes later — this is here to show the system survives the squeeze. Same tokens, two-up grid, bottom nav."
+    }
+  ],
+  "launch": { "view": "canvas" }
+}

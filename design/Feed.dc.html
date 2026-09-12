@@ -1,0 +1,233 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: #0a0a0b; color: #f4f1ec;
+      font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: #ff5a1f; text-decoration: none; }
+    a:hover { color: #ff7a45; }
+    .display {
+      font-family: 'Bricolage Grotesque', 'Instrument Sans', system-ui, sans-serif;
+      font-weight: 800; letter-spacing: -0.045em; line-height: 0.9;
+    }
+    .grid-paper {
+      background-image:
+        linear-gradient(rgba(244,241,236,0.14) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(244,241,236,0.14) 1px, transparent 1px);
+      background-size: 56px 56px;
+    }
+    .chip {
+      cursor: pointer; font-family: inherit;
+      border: 1px solid rgba(244,241,236,0.2); border-radius: 999px;
+      padding: 10px 18px; font-size: 14px; font-weight: 500;
+      color: #cfcac1; background: transparent; white-space: nowrap;
+      transition: background .22s, color .22s, border-color .22s;
+    }
+    .chip:hover { border-color: rgba(244,241,236,0.5); color: #f4f1ec; }
+    .chip-on { background: #f4f1ec; color: #0a0a0b; border-color: #f4f1ec; font-weight: 600; }
+    .chip-on:hover { color: #0a0a0b; }
+    .card {
+      border: 1px solid rgba(244,241,236,0.16); border-radius: 18px; overflow: hidden;
+      background: rgba(244,241,236,0.03); cursor: pointer;
+      transition: transform .35s cubic-bezier(.2,.7,.3,1), border-color .35s;
+    }
+    .card:hover { transform: translateY(-6px); border-color: rgba(255,90,31,0.55); }
+    .card:hover .thumb-art { transform: scale(1.06) rotate(-1.5deg); }
+    .thumb-art { transition: transform .5s cubic-bezier(.2,.7,.3,1); }
+    .urgent-card {
+      border: 1px solid rgba(255,90,31,0.4); border-radius: 18px; overflow: hidden;
+      background: linear-gradient(160deg, rgba(255,90,31,0.12), rgba(244,241,236,0.02));
+      cursor: pointer; transition: transform .35s cubic-bezier(.2,.7,.3,1), border-color .35s;
+    }
+    .urgent-card:hover { transform: translateY(-6px); border-color: #ff5a1f; }
+    .pulse { animation: pulse 2.4s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .5 } }
+  </style>
+</helmet>
+
+<div class="grid-paper" style="width: 1440px; min-height: 1180px; background-color: #0a0a0b;">
+
+  <!-- nav -->
+  <nav style="display: flex; align-items: center; justify-content: space-between; padding: 20px 56px; border-bottom: 1px solid rgba(244,241,236,0.14); background: rgba(10,10,11,0.86);">
+    <div style="display: flex; align-items: center; gap: 34px;">
+      <div style="display: flex; align-items: baseline; gap: 9px;">
+        <span class="display" style="font-size: 22px; letter-spacing: -0.06em;">ReWyse</span>
+        <span style="width: 6px; height: 6px; border-radius: 50%; background: #ff5a1f; display: inline-block;"></span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 9px; border: 1px solid rgba(244,241,236,0.22); border-radius: 999px; padding: 8px 15px; cursor: pointer;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ff5a1f" stroke-width="2.4" stroke-linecap="round"><path d="M12 21s-7-5.5-7-11a7 7 0 1 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+        <span style="font-size: 13.5px; font-weight: 500;">Delhi Cluster</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#cfcac1" stroke-width="2.6" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 11px; border: 1px solid rgba(244,241,236,0.2); border-radius: 999px; padding: 11px 20px; width: 380px;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#cfcac1" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <span style="font-size: 14px; color: #7d7970;">Search monitors, desks, textbooks…</span>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 18px;">
+      <div style="position: relative;">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#cfcac1" stroke-width="2" stroke-linecap="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        <span style="position: absolute; top: -3px; right: -3px; width: 8px; height: 8px; border-radius: 50%; background: #ff5a1f;"></span>
+      </div>
+      <span style="display: inline-flex; align-items: center; gap: 8px; background: #ff5a1f; color: #0a0a0b; font-weight: 600; font-size: 14px; padding: 11px 20px; border-radius: 999px; cursor: pointer;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Sell
+      </span>
+      <div style="width: 36px; height: 36px; border-radius: 50%; background: #f4f1ec; color: #0a0a0b; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;">S</div>
+    </div>
+  </nav>
+
+  <!-- clearance rail -->
+  <section style="padding: 40px 56px 8px;">
+    <div style="display: flex; align-items: center; gap: 13px; margin-bottom: 22px;">
+      <span class="pulse" style="width: 8px; height: 8px; border-radius: 50%; background: #ff5a1f; display: inline-block;"></span>
+      <h2 class="display" style="font-size: 30px; margin: 0;">Move-out clearance</h2>
+      <span style="font-size: 13.5px; color: #cfcac1;">Sellers vacating within 7 days</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px;">
+      <sc-for list="{{urgent}}" as="u" hint-placeholder-count="4">
+        <div class="urgent-card">
+          <div style="height: 132px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(255,90,31,0.24); position: relative;">
+            <div class="thumb-art" innerHTML="{{u.art}}"></div>
+            <div style="position: absolute; top: 12px; left: 12px; background: #ff5a1f; color: #0a0a0b; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; padding: 5px 11px; border-radius: 999px;">{{u.badge}}</div>
+          </div>
+          <div style="padding: 16px 17px 18px;">
+            <div style="font-size: 14.5px; font-weight: 600; margin-bottom: 8px;">{{u.title}}</div>
+            <div style="display: flex; align-items: baseline; gap: 9px;">
+              <span class="display" style="font-size: 24px; color: #ff5a1f;">{{u.price}}</span>
+              <span style="font-size: 13px; color: #7d7970; text-decoration: line-through;">{{u.was}}</span>
+            </div>
+            <div style="font-size: 12px; color: #cfcac1; margin-top: 10px;">{{u.campus}}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <!-- filters + grid -->
+  <section style="padding: 44px 56px 70px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+      <div style="display: flex; gap: 9px;">
+        <sc-for list="{{cats}}" as="c" hint-placeholder-count="5">
+          <button class="chip {{c.cls}}" onClick="{{c.pick}}">{{c.label}}</button>
+        </sc-for>
+      </div>
+      <span style="font-size: 13.5px; color: #cfcac1;">{{count}}</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px;">
+      <sc-for list="{{items}}" as="it" hint-placeholder-count="8">
+        <div class="card">
+          <div style="height: 168px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(244,241,236,0.12); position: relative; background: {{it.tint}};">
+            <div class="thumb-art" innerHTML="{{it.art}}"></div>
+            <sc-if value="{{it.fair}}" hint-placeholder-val="{{true}}">
+              <div style="position: absolute; top: 12px; right: 12px; background: rgba(10,10,11,0.72); color: #f4f1ec; font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 999px; display: flex; align-items: center; gap: 5px;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#ff5a1f" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5.5 5.5L20 7"/></svg>
+                Fair price
+              </div>
+            </sc-if>
+          </div>
+          <div style="padding: 16px 17px 18px;">
+            <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 7px;">
+              <span class="display" style="font-size: 24px;">{{it.price}}</span>
+              <span style="font-size: 11.5px; color: #cfcac1; border: 1px solid rgba(244,241,236,0.2); padding: 3px 9px; border-radius: 999px;">{{it.cond}}</span>
+            </div>
+            <div style="font-size: 14.5px; font-weight: 500; margin-bottom: 11px;">{{it.title}}</div>
+            <div style="display: flex; align-items: center; gap: 7px; font-size: 12px; color: #cfcac1;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#ff5a1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5.5 5.5L20 7"/></svg>
+              <span>{{it.campus}}</span>
+              <span style="color: #55524c;">·</span>
+              <span>{{it.days}}</span>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{}'>
+/**
+ * Item thumbnails are drawn, not photographed. Placeholder stock photos in a
+ * marketplace mockup read as fake and make the grid look like a template; line
+ * art keeps the campus-notebook feel and stays honest about being a mockup.
+ */
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { cat: 'all' };
+  }
+
+  art(kind) {
+    const s = 'fill="none" stroke="#ff5a1f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"';
+    const shapes = {
+      monitor: '<rect x="8" y="12" width="64" height="42" rx="3"/><path d="M32 54v8h16v-8M28 62h24"/>',
+      desk: '<path d="M6 26h68M12 26v34M68 26v34M12 40h56"/>',
+      chair: '<path d="M24 14h32v22H24zM26 36v24M54 36v24M20 44h40"/>',
+      fridge: '<rect x="22" y="8" width="36" height="58" rx="4"/><path d="M22 30h36M50 18v8M50 38v8"/>',
+      books: '<path d="M14 18h20v46H14zM36 22h18v42H36zM56 26l12 3-9 38-12-3z"/>',
+      lamp: '<path d="M28 46h24l-8-30h-8zM40 46v18M28 64h24"/>',
+      keyboard: '<rect x="8" y="24" width="64" height="32" rx="4"/><path d="M18 34h6M30 34h6M42 34h6M54 34h6M18 44h44"/>',
+      cycle: '<circle cx="20" cy="48" r="13"/><circle cx="60" cy="48" r="13"/><path d="M20 48l12-22h14l8 22M32 26h12"/>',
+    };
+    return '<svg width="80" height="76" viewBox="0 0 80 76" ' + s + '>' + (shapes[kind] || shapes.monitor) + '</svg>';
+  }
+
+  renderVals() {
+    const all = [
+      { title: 'Dell 24" IPS Monitor', price: '₹3,750', cond: 'Like new', campus: 'IITD', days: '6 days left', cat: 'electronics', kind: 'monitor', fair: true, tint: 'rgba(255,90,31,0.05)' },
+      { title: 'Study table, solid wood', price: '₹1,900', cond: 'Good', campus: 'IIITD', days: '12 days left', cat: 'furniture', kind: 'desk', fair: true, tint: 'rgba(244,241,236,0.03)' },
+      { title: 'Ergonomic study chair', price: '₹1,450', cond: 'Good', campus: 'DTU', days: '9 days left', cat: 'furniture', kind: 'chair', fair: false, tint: 'rgba(244,241,236,0.03)' },
+      { title: 'Mini fridge, 45L', price: '₹4,200', cond: 'Fair', campus: 'IITD', days: '3 days left', cat: 'appliances', kind: 'fridge', fair: true, tint: 'rgba(255,90,31,0.05)' },
+      { title: 'GATE CS prep set, 6 books', price: '₹850', cond: 'Good', campus: 'DTU', days: '18 days left', cat: 'books', kind: 'books', fair: true, tint: 'rgba(244,241,236,0.03)' },
+      { title: 'Mechanical keyboard, brown', price: '₹2,100', cond: 'Like new', campus: 'IIITD', days: '5 days left', cat: 'electronics', kind: 'keyboard', fair: false, tint: 'rgba(244,241,236,0.03)' },
+      { title: 'Desk lamp, adjustable arm', price: '₹450', cond: 'Good', campus: 'IIITD', days: '7 days left', cat: 'furniture', kind: 'lamp', fair: true, tint: 'rgba(244,241,236,0.03)' },
+      { title: 'Hostel cycle, single speed', price: '₹2,800', cond: 'Fair', campus: 'DTU', days: '14 days left', cat: 'other', kind: 'cycle', fair: true, tint: 'rgba(244,241,236,0.03)' },
+    ];
+
+    const cats = [
+      { id: 'all', label: 'Everything' },
+      { id: 'electronics', label: 'Electronics' },
+      { id: 'furniture', label: 'Room furniture' },
+      { id: 'appliances', label: 'Appliances' },
+      { id: 'books', label: 'Study & books' },
+    ];
+
+    const active = this.state.cat;
+    const shown = active === 'all' ? all : all.filter((i) => i.cat === active);
+
+    return {
+      cats: cats.map((c) => ({
+        label: c.label,
+        cls: c.id === active ? 'chip-on' : '',
+        pick: () => this.setState({ cat: c.id }),
+      })),
+      count: shown.length + ' of ' + all.length + ' listings',
+      items: shown.map((i) => ({ ...i, art: this.art(i.kind) })),
+      urgent: [
+        { title: 'Mini fridge, 45L', price: '₹4,200', was: '₹5,800', badge: '3 DAYS', campus: 'IITD · 4.1 km', art: this.art('fridge') },
+        { title: 'Dell 24" Monitor', price: '₹3,750', was: '₹5,100', badge: '6 DAYS', campus: 'IITD · 4.1 km', art: this.art('monitor') },
+        { title: 'Mechanical keyboard', price: '₹2,100', was: '₹2,600', badge: '5 DAYS', campus: 'IIITD · on campus', art: this.art('keyboard') },
+        { title: 'Desk lamp', price: '₹450', was: '₹600', badge: '7 DAYS', campus: 'IIITD · on campus', art: this.art('lamp') },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

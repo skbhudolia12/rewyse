@@ -1,85 +1,57 @@
 @import "tailwindcss";
 
 /*
-  ReWyse design tokens.
+  ReWyse design tokens — "Move-out season".
 
-  Mobile-first: every size here is tuned for a 390px viewport held one-handed.
-  Desktop is a centred column, not a separate design.
+  Dark-first by intent, not by preference: the product is a countdown, and the
+  countdown reads on near-black. There is no light theme; a marketplace whose
+  urgency signal inverts between viewers is not one design.
 
-  Colour intent:
-    brand   -- deep teal. Reuse and trust, deliberately not generic startup blue.
-    urgency -- amber to red, reserved EXCLUSIVELY for move-out countdowns and
-               clearance. If urgency colour appears anywhere else it stops
-               meaning "this is running out", which is the one signal the whole
-               product depends on.
-    verify  -- green, reserved for verification badges only.
+  Colour discipline, and the rule the whole system rests on:
+  FLAME MEANS TIME RUNNING OUT. Countdowns, clearance, the sell-fast price.
+  Nowhere else. The moment it decorates a generic button it stops carrying that
+  meaning, and a student scanning the feed loses the one signal they can read
+  without words.
 */
 
 @theme {
-  --color-brand-50: #eefdfa;
-  --color-brand-100: #d3f9f1;
-  --color-brand-200: #acf1e5;
-  --color-brand-300: #73e4d4;
-  --color-brand-400: #39cdbc;
-  --color-brand-500: #1db1a3;
-  --color-brand-600: #128f85;
-  --color-brand-700: #12726b;
-  --color-brand-800: #145b57;
-  --color-brand-900: #154c49;
-  --color-brand-950: #042f2e;
+  --color-ink: #0a0a0b;
+  --color-ink-raised: #141416;
+  --color-paper: #f4f1ec;
+  --color-paper-dim: #cfcac1;
+  --color-paper-faint: #7d7970;
 
-  --color-urgency-50: #fff7ed;
-  --color-urgency-100: #ffedd5;
-  --color-urgency-300: #fdba74;
-  --color-urgency-500: #f97316;
-  --color-urgency-600: #ea580c;
-  --color-urgency-700: #c2410c;
-  --color-urgency-critical: #dc2626;
+  --color-flame: #ff5a1f;
+  --color-flame-bright: #ff7a45;
+  --color-flame-amber: #ffa11f;
+  --color-flame-soft: rgba(255, 90, 31, 0.14);
+  --color-flame-edge: rgba(255, 90, 31, 0.45);
 
-  --color-verify-100: #dcfce7;
-  --color-verify-500: #22c55e;
-  --color-verify-600: #16a34a;
-  --color-verify-700: #15803d;
+  --color-hairline: rgba(244, 241, 236, 0.14);
+  --color-hairline-strong: rgba(244, 241, 236, 0.24);
+  --color-surface: rgba(244, 241, 236, 0.03);
 
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --color-verify: #6ee7a8;
+  --color-verify-soft: rgba(110, 231, 168, 0.14);
+  --color-danger: #ff6b5e;
+  --color-danger-soft: rgba(255, 107, 94, 0.14);
 
-  /* Bottom nav height; content panes pad by this so nothing hides behind it. */
-  --spacing-nav: 4rem;
-}
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
 
-:root {
-  --background: #fafaf9;
-  --surface: #ffffff;
-  --surface-muted: #f5f5f4;
-  --foreground: #1c1917;
-  --muted: #78716c;
-  --border: #e7e5e4;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0c0a09;
-    --surface: #1c1917;
-    --surface-muted: #292524;
-    --foreground: #fafaf9;
-    --muted: #a8a29e;
-    --border: #292524;
-  }
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-surface: var(--surface);
-  --color-surface-muted: var(--surface-muted);
-  --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
-  --color-border: var(--border);
+  --spacing-nav: 4.5rem;
 }
 
 @layer base {
+  html {
+    background: var(--color-ink);
+    color-scheme: dark;
+  }
+
   body {
-    background: var(--background);
-    color: var(--foreground);
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
 
@@ -90,7 +62,11 @@
     font-size: 16px;
   }
 
-  /* Respect users who have asked the OS to reduce motion. */
+  ::selection {
+    background: var(--color-flame);
+    color: var(--color-ink);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -102,11 +78,59 @@
 }
 
 @layer utilities {
-  /* Keeps content clear of the iOS home indicator and the bottom nav. */
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 0.92;
+  }
+
+  /* Campus notebook. Barely there by design — texture, not decoration. */
+  .grid-paper {
+    background-image:
+      linear-gradient(var(--color-hairline) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-hairline) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  .grid-paper-tight {
+    background-image:
+      linear-gradient(var(--color-hairline) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-hairline) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+
   .pb-safe {
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
   }
+
   .pb-nav {
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--spacing-nav) + 1rem);
+  }
+
+  .pulse-dot {
+    animation: pulse-dot 2.4s ease-in-out infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.45;
+    }
+  }
+
+  .ticker-track {
+    display: flex;
+    width: max-content;
+    animation: ticker-slide 26s linear infinite;
+  }
+
+  @keyframes ticker-slide {
+    to {
+      transform: translateX(-50%);
+    }
   }
 }

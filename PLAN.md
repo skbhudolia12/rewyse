@@ -7,8 +7,8 @@ Source spec: [`ReWyse_Website_Build_Spec.md`](./ReWyse_Website_Build_Spec.md)
 |---|---|---|
 | 0 | Foundation — scaffold, schema, RLS, pricing rails | ✅ **Complete** |
 | 1 | Identity & the trust gate | ✅ **Complete** |
-| 2 | Listing + pricing engine | ⬜ Next |
-| 3 | Discovery | ⬜ |
+| 2 | Listing + pricing engine | ✅ **Complete** — see [PHASE2-CHECKLIST.md](./PHASE2-CHECKLIST.md) |
+| 3 | Discovery | ⬜ Next |
 | 4 | Transaction — chat, offers, meetups *(pilot opens)* | ⬜ |
 | 5 | Profile, trust, ops, hypothesis dashboard | ⬜ |
 
@@ -29,6 +29,8 @@ The product's reason to exist is one testable hypothesis: **a seller facing a mo
 | Platform | Mobile-first responsive PWA |
 | Stack | Next.js 16 (App Router) + TypeScript + Tailwind 4 + Supabase |
 | Pricing engine | LLM estimates base value; **deterministic code owns urgency math and rails** |
+| Visual direction | "Move-out season" — orange/black, flame reserved for time running out |
+| Payments | **Reversed from spec:** funds held until buyer confirms receipt (Phase 4, see checklist) |
 | Offers | Structured `Offer` entity, free-form chat alongside |
 | Notifications | Transactional email + in-app badge; web push later |
 | Chat safety | Safety banner + report button + admin review queue; no automated filtering |

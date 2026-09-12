@@ -68,13 +68,13 @@ export default async function VerificationQueuePage() {
 
       {error && (
         <Card>
-          <p className="text-sm text-red-600">Could not load the queue: {error.message}</p>
+          <p className="text-sm text-danger">Could not load the queue: {error.message}</p>
         </Card>
       )}
 
       {reviews.length === 0 && !error ? (
         <Card>
-          <p className="text-sm text-[var(--muted)]">
+          <p className="text-sm text-paper-dim">
             The queue is empty. Every student who has signed up has been reviewed.
           </p>
         </Card>
@@ -86,7 +86,7 @@ export default async function VerificationQueuePage() {
         </div>
       )}
 
-      <p className="text-xs text-[var(--muted)]">
+      <p className="text-xs text-paper-dim">
         Every signup lands here. If this queue grows faster than it is cleared, it becomes the
         limit on the pilot&rsquo;s growth — not the product.
       </p>

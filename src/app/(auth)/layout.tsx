@@ -6,7 +6,7 @@ export default function AuthLayout({ children }: LayoutProps<'/'>) {
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-5 pt-6 pb-safe">
       <Link
         href="/"
-        className="mb-8 inline-flex items-center gap-1.5 text-sm text-[var(--muted)] hover:text-[var(--foreground)]"
+        className="mb-8 inline-flex items-center gap-1.5 text-sm text-paper-dim hover:text-paper"
       >
         <ArrowLeft className="size-4" />
         Back

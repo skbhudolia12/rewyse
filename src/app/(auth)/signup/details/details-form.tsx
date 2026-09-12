@@ -98,7 +98,7 @@ export function DetailsForm({ email }: { email: string }) {
 
       <div className="space-y-2">
         <p className="text-sm font-medium">Student ID card</p>
-        <p className="text-xs text-[var(--muted)]">
+        <p className="text-xs text-paper-dim">
           Photograph your physical college ID. A reviewer checks it by hand, then the photo is
           deleted — we keep the decision, not the image.
         </p>
@@ -117,7 +117,7 @@ export function DetailsForm({ email }: { email: string }) {
         <input type="hidden" name="documentPath" value={upload.status === 'done' ? upload.path : ''} />
 
         {upload.status === 'done' ? (
-          <div className="border-verify-500/40 bg-verify-100/40 flex items-center gap-3 rounded-xl border p-3">
+          <div className="border-verify/40 bg-verify-soft flex items-center gap-3 rounded-xl border p-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={upload.preview}
@@ -125,7 +125,7 @@ export function DetailsForm({ email }: { email: string }) {
               className="size-14 rounded-lg object-cover"
             />
             <div className="min-w-0 flex-1">
-              <p className="text-verify-700 flex items-center gap-1.5 text-sm font-medium">
+              <p className="text-verify flex items-center gap-1.5 text-sm font-medium">
                 <CheckCircle2 className="size-4" /> ID uploaded
               </p>
               <button
@@ -134,7 +134,7 @@ export function DetailsForm({ email }: { email: string }) {
                   setUpload({ status: 'idle' });
                   fileInput.current?.click();
                 }}
-                className="text-xs text-[var(--muted)] underline"
+                className="text-xs text-paper-dim underline"
               >
                 Replace photo
               </button>
@@ -164,9 +164,9 @@ export function DetailsForm({ email }: { email: string }) {
         {upload.status === 'error' && <Alert tone="error">{upload.message}</Alert>}
       </div>
 
-      <div className="bg-brand-50 border-brand-200 flex gap-3 rounded-xl border p-3.5">
-        <ShieldCheck className="text-brand-600 mt-0.5 size-5 shrink-0" />
-        <p className="text-brand-900 text-sm">
+      <div className="bg-flame-soft border-flame-edge flex gap-3 rounded-xl border p-3.5">
+        <ShieldCheck className="text-flame mt-0.5 size-5 shrink-0" />
+        <p className="text-paper text-sm">
           Only verified campus peers can message or buy. Your ID photo is visible to the ReWyse
           review team alone, and is deleted once your account is reviewed.
         </p>
