@@ -16,11 +16,13 @@
     "seed": "node scripts/seed.mjs",
     "db:migrate": "node scripts/migrate.mjs",
     "db:status": "node scripts/migrate.mjs --status",
-    "test:integration": "vitest run --config vitest.integration.mts"
+    "test:integration": "vitest run --config vitest.integration.mts",
+    "make-admin": "node scripts/make-admin.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.116.0",
+    "browser-image-compression": "^2.0.2",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "lucide-react": "^1.45.0",

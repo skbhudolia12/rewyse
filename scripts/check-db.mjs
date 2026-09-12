@@ -86,8 +86,10 @@ if (!url) {
   process.exit(1);
 }
 ok(`project url ${url.replace(/https:\/\/([^.]{4})[^.]*/, 'https://$1***')}`);
-publishable ? ok('publishable key present') : bad('publishable key missing');
-serviceRole ? ok('service role key present') : bad('service role key missing');
+if (publishable) ok('publishable key present');
+else bad('publishable key missing');
+if (serviceRole) ok('service role key present');
+else bad('service role key missing');
 if (!publishable || !serviceRole) {
   console.error('\nFill the missing keys in .env.local.\n');
   process.exit(1);
@@ -103,7 +105,8 @@ const anon = createClient(url, publishable, {
 console.log('\nConnectivity');
 try {
   const res = await fetch(`${url}/auth/v1/health`, { headers: { apikey: publishable } });
-  res.ok ? ok(`auth service reachable (${res.status})`) : bad(`auth service returned ${res.status}`);
+  if (res.ok) ok(`auth service reachable (${res.status})`);
+  else bad(`auth service returned ${res.status}`);
 } catch (err) {
   bad(`cannot reach project: ${err.message}`);
   console.error('\nCheck the URL, and that the project is not paused.\n');
@@ -136,7 +139,8 @@ if (missing.length === EXPECTED_TABLES.length) {
   for (const fn of EXPECTED_FUNCTIONS) {
     const { error } = await admin.rpc(fn);
     // A missing function is PGRST202; anything else means it exists and ran.
-    error?.code === 'PGRST202' ? bad(`${fn}() not found`) : ok(`${fn}() present`);
+    if (error?.code === 'PGRST202') bad(`${fn}() not found`);
+    else ok(`${fn}() present`);
   }
 }
 

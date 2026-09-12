@@ -34,11 +34,22 @@ if (!parsedPublic.success) {
 
 export const publicEnv = parsedPublic.data;
 
+/**
+ * An unset key in .env.local is present-but-empty, not absent, so a bare
+ * `.optional()` still fails its `min(1)`. Treat blank as unset: these services
+ * are genuinely optional and the app must boot without them.
+ */
+const optionalSecret = z.preprocess(
+  (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+  z.string().min(1).optional(),
+);
+
 const serverSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
-  GEMINI_API_KEY: z.string().min(1).optional(),
-  GROQ_API_KEY: z.string().min(1).optional(),
-  RESEND_API_KEY: z.string().min(1).optional(),
+  DATABASE_URL: optionalSecret,
+  GEMINI_API_KEY: optionalSecret,
+  GROQ_API_KEY: optionalSecret,
+  RESEND_API_KEY: optionalSecret,
 });
 
 let cachedServerEnv: z.infer<typeof serverSchema> | null = null;

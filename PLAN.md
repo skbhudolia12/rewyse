@@ -6,8 +6,8 @@ Source spec: [`ReWyse_Website_Build_Spec.md`](./ReWyse_Website_Build_Spec.md)
 | Phase | Scope | Status |
 |---|---|---|
 | 0 | Foundation — scaffold, schema, RLS, pricing rails | ✅ **Complete** |
-| 1 | Identity & the trust gate | ⬜ Next |
-| 2 | Listing + pricing engine | ⬜ |
+| 1 | Identity & the trust gate | ✅ **Complete** |
+| 2 | Listing + pricing engine | ⬜ Next |
 | 3 | Discovery | ⬜ |
 | 4 | Transaction — chat, offers, meetups *(pilot opens)* | ⬜ |
 | 5 | Profile, trust, ops, hypothesis dashboard | ⬜ |
@@ -120,15 +120,30 @@ Currently implemented **as specced**, with the flat region pinned in a test that
 
 ---
 
-# Phase 1 — Identity & the trust gate ⬜ Next
+# Phase 1 — Identity & the trust gate ✅ Complete
 
-- `/signup` per §5.1: name, campus email, cluster select, hostel, move-out date, ID capture, trust-copy block
-- Two independent gates: email domain match **AND** admin ID approval → `verified`
-- "Verification pending — usually reviewed within 24 hours" state (ship that copy only once someone owns the queue)
-- Admin console v1: ID review queue, approve/reject with reason, image deleted on decision
-- Route gating: unverified users cannot list, chat, or offer
+**55 unit tests · 30 integration tests · typecheck, lint and build clean**
 
-**Needs:** live Supabase project + keys in `.env.local`.
+### Auth
+Login and signup are one flow: a single emailed sign-in link, no password. Splitting them would answer "does this address have an account?" to anyone who asks, and would strand any student interrupted between confirming their email and filling in details. `/auth/callback` handles both the PKCE `code` and `token_hash` shapes, so an email-template change in the dashboard cannot silently break sign-in, and routes by how far through onboarding the user actually is.
+
+### The two gates
+- **Gate A — campus email.** Allow-list matched on the *full* domain. `resolveCampusForEmail` is a tested pure function: `notiiitd.ac.in`, `cse.iiitd.ac.in`, `iiitd.ac.in@gmail.com` and `iiitd.ac.in.evil.com` are all rejected, each of which passes a naive `endsWith` check. Set only after the user follows the emailed link, so it means inbox access and not just a typed string.
+- **Gate B — ID review.** Photo captured in-app, compressed client-side to ~400KB, uploaded straight to private storage. A human reviewer approves or rejects.
+- `verified_status` is derived by trigger from both. No code path can mark someone verified who only cleared email.
+
+### Review queue — `/admin/verifications`
+Oldest-first, signed URLs expiring in 10 minutes, approve or reject-with-reason. On decision the row's path is nulled *and* the storage object is deleted — a null column with a live file in the bucket is a lost pointer to retained personal data, not deletion. Admin is not self-serve; `npm run make-admin -- <email>` is the only way in.
+
+### Storage — `0004_storage.sql`
+Both buckets private. `id-documents` is readable by its owner and admins only; `listing-media` requires `is_verified()` to write. Tested: a student cannot upload into another's folder, download their ID, or sign a URL for it, and the bucket is not publicly fetchable.
+
+### Design system
+Mobile-first at 390px, 44px minimum tap targets, 16px inputs so iOS does not zoom on focus, `prefers-reduced-motion` respected, safe-area insets handled. Urgency colour is reserved exclusively for move-out countdowns — if it appears elsewhere it stops meaning "this is running out", which is the one signal the product depends on.
+
+### ⚠️ Blocker before any real student signs up
+
+**Supabase's built-in email service sends 2 messages per hour, project-wide.** Not per user — two, total. Sign-in is unusable beyond a single test until custom SMTP is configured (Authentication → SMTP). Resend's free tier is 3,000/month and is already in `.env.example` as `RESEND_API_KEY`. Custom SMTP starts at 30/hour, raisable in the dashboard's rate-limit settings.
 
 # Phase 2 — Listing + pricing engine ⬜  ← the hypothesis
 
