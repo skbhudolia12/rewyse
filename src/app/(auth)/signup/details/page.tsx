@@ -6,8 +6,12 @@ import { getProfile, requireUser } from '@/lib/auth/session';
 export default async function SignupDetailsPage() {
   const user = await requireUser();
 
-  // Someone who already finished signup does not need to fill it in again.
-  if (await getProfile()) redirect('/verify');
+  // Only send them onward once an ID has actually been queued for review.
+  // A profile alone is not "finished signup" -- an interrupted attempt leaves
+  // one behind, and bouncing on it strands the student on a pending screen
+  // that nothing will ever resolve.
+  const profile = await getProfile();
+  if (profile && profile.id_review_status !== 'not_submitted') redirect('/verify');
 
   return (
     <div className="space-y-8">

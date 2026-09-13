@@ -79,17 +79,22 @@ export async function completeSignup(
     return { error: 'Your email is not on a recognised campus. Contact the ReWyse team.' };
   }
 
-  const { error: profileError } = await supabase.from('profiles').insert({
-    id: user.id,
-    full_name: input.fullName,
-    email: user.email.toLowerCase(),
-    campus_id: campusId,
-    hostel_or_hall: input.hostel ?? null,
-    moveout_date: input.moveoutDate,
-  });
+  // Upsert rather than insert. A student whose first attempt failed partway --
+  // profile written, ID submission not -- must be able to finish, not be bounced
+  // to a pending screen that will never resolve because nothing was queued.
+  const { error: profileError } = await supabase.from('profiles').upsert(
+    {
+      id: user.id,
+      full_name: input.fullName,
+      email: user.email.toLowerCase(),
+      campus_id: campusId,
+      hostel_or_hall: input.hostel ?? null,
+      moveout_date: input.moveoutDate,
+    },
+    { onConflict: 'id' },
+  );
 
   if (profileError) {
-    if (profileError.code === '23505') redirect('/verify'); // already signed up
     return { error: `Could not save your details: ${profileError.message}` };
   }
 
@@ -101,10 +106,13 @@ export async function completeSignup(
     .eq('id', user.id);
   if (gateError) return { error: 'Could not confirm your campus email. Please try again.' };
 
+  // `status` is deliberately absent: the column defaults to 'pending_review',
+  // and authenticated holds INSERT on only profile_id and document_path. Naming
+  // status here is a permission-denied error, which is exactly how the first
+  // version of this silently failed to queue anyone for review.
   const { error: idError } = await supabase.from('id_verifications').insert({
     profile_id: user.id,
     document_path: input.documentPath,
-    status: 'pending_review',
   });
   if (idError) return { error: `Could not submit your ID: ${idError.message}` };
 

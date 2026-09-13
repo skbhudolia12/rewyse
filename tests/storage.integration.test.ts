@@ -190,3 +190,43 @@ describe('listing-media bucket', () => {
     expect(error).not.toBeNull();
   });
 });
+
+/**
+ * Regression: signup silently failed to queue anyone for review.
+ *
+ * The action inserted `status: 'pending_review'` explicitly, but `authenticated`
+ * holds INSERT on only profile_id and document_path -- so Postgres denied the
+ * write on a column grant. The photo reached storage, no review row was created,
+ * and the student sat on a pending screen that nothing would ever resolve.
+ *
+ * These assert the insert shape the app actually uses, as a user, through RLS.
+ */
+describe('id_verifications insert shape', () => {
+  it('accepts the columns signup is granted, defaulting status', async () => {
+    const { data, error } = await alice.client
+      .from('id_verifications')
+      .insert({ profile_id: alice.id, document_path: `${alice.id}/${RUN}-signup.jpg` })
+      .select('id, status')
+      .single();
+
+    expect(error).toBeNull();
+    expect(data?.status).toBe('pending_review');
+    if (data) await admin.from('id_verifications').delete().eq('id', data.id);
+  });
+
+  it('rejects naming a column signup is not granted', async () => {
+    const { error } = await alice.client.from('id_verifications').insert({
+      profile_id: alice.id,
+      document_path: `${alice.id}/${RUN}-denied.jpg`,
+      status: 'approved',
+    } as never);
+    expect(error).not.toBeNull();
+  });
+
+  it('refuses a review row filed against another student', async () => {
+    const { error } = await bob.client
+      .from('id_verifications')
+      .insert({ profile_id: alice.id, document_path: `${alice.id}/${RUN}-forged.jpg` });
+    expect(error).not.toBeNull();
+  });
+});
