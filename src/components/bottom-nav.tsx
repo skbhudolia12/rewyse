@@ -16,7 +16,7 @@ const ITEMS = [
 export function BottomNav({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
   const items = isAdmin
-    ? [...ITEMS, { href: '/admin/verifications', label: 'Review', icon: ShieldCheck } as const]
+    ? [...ITEMS, { href: '/admin', label: 'Admin', icon: ShieldCheck } as const]
     : ITEMS;
 
   return (

@@ -43,6 +43,12 @@ export type ReportTargetType = 'listing' | 'user' | 'conversation';
 export type ReportStatus = 'open' | 'reviewing' | 'actioned' | 'dismissed';
 export type MediaKind = 'photo' | 'video';
 
+/**
+ * Simulated-escrow states. No real money moves through any of these during the
+ * pilot; see supabase/migrations/0005_payments.sql.
+ */
+export type PaymentStatus = 'initiated' | 'held' | 'released' | 'refunded' | 'cancelled';
+
 export interface Cluster {
   id: string;
   name: string;
@@ -170,5 +176,24 @@ export interface AppNotification {
   type: string;
   payload: Record<string, unknown>;
   read_at: string | null;
+  created_at: string;
+}
+
+export interface Payment {
+  id: string;
+  listing_id: string;
+  conversation_id: string | null;
+  buyer_id: string;
+  seller_id: string;
+  amount: number;
+  status: PaymentStatus;
+  gateway_reference: string;
+  is_simulated: boolean;
+  buyer_confirmed_at: string | null;
+  released_by: string | null;
+  released_at: string | null;
+  refunded_by: string | null;
+  refunded_at: string | null;
+  admin_note: string | null;
   created_at: string;
 }

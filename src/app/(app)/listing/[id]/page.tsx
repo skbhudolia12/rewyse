@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { CheckCircle2, MapPin, ShieldCheck } from 'lucide-react';
 import { Alert, Badge, Button, Card, DaysLeft } from '@/components/ui';
+import { BuyButton } from './buy-button';
 import { requireVerified } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
 import { formatINR } from '@/lib/utils';
@@ -189,17 +190,10 @@ export default async function ListingDetailPage({
                 <p className="text-paper-faint text-center text-xs">This is your listing.</p>
               </div>
             ) : (
-              <div className="space-y-2.5">
-                <Button variant="flame" size="lg" className="w-full" disabled>
-                  Make an offer
-                </Button>
-                <Button variant="secondary" size="lg" className="w-full" disabled>
-                  Message {listing.seller?.full_name?.split(' ')[0] ?? 'seller'}
-                </Button>
-                <p className="text-paper-faint text-center text-xs">
-                  Offers and chat arrive in the next phase.
-                </p>
-              </div>
+              <BuyButton
+                listingId={listing.id}
+                sellerFirstName={listing.seller?.full_name?.split(' ')[0] ?? 'seller'}
+              />
             )}
           </Card>
 
