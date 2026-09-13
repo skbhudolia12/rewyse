@@ -26,3 +26,8 @@ export const PAYMENTS_QUEUE_SELECT = `
   buyer:profiles!payments_buyer_id_fkey(full_name, email),
   seller:profiles!payments_seller_id_fkey(full_name, email)
 `;
+
+export const REPORTS_QUEUE_SELECT = `
+  id, target_type, target_id, reason, detail, status, created_at, action_taken,
+  reporter:profiles!reports_reporter_id_fkey(full_name, email)
+`;

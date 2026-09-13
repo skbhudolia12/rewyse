@@ -16,7 +16,11 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { readFileSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { PAYMENTS_QUEUE_SELECT, PENDING_VERIFICATIONS_SELECT } from '@/lib/admin/queries';
+import {
+  PAYMENTS_QUEUE_SELECT,
+  PENDING_VERIFICATIONS_SELECT,
+  REPORTS_QUEUE_SELECT,
+} from '@/lib/admin/queries';
 
 function loadEnv(file = '.env.local'): Record<string, string> {
   const env: Record<string, string> = {};
@@ -214,5 +218,66 @@ describe('payments queue', () => {
       .order('created_at', { ascending: false })
       .limit(10);
     expect(error).toBeNull();
+  });
+});
+
+describe('reports queue', () => {
+  it('loads with the embed the page actually sends', async () => {
+    const { error } = await reviewer.client
+      .from('reports')
+      .select(REPORTS_QUEUE_SELECT)
+      .order('created_at', { ascending: false })
+      .limit(10);
+    expect(error).toBeNull();
+  });
+
+  it('lets an admin resolve a report, which is what the grant in 0007 enables', async () => {
+    const { data: report } = await admin
+      .from('reports')
+      .insert({
+        reporter_id: student.id,
+        target_type: 'user',
+        target_id: applicant.id,
+        reason: `${RUN} test report`,
+      })
+      .select('id')
+      .single();
+
+    const { error } = await reviewer.client
+      .from('reports')
+      .update({
+        status: 'dismissed',
+        reviewed_by: reviewer.id,
+        reviewed_at: new Date().toISOString(),
+        action_taken: 'Not a real report',
+      })
+      .eq('id', report!.id);
+    expect(error).toBeNull();
+
+    await admin.from('reports').delete().eq('id', report!.id);
+  });
+
+  it('refuses an ordinary student resolving a report', async () => {
+    const { data: report } = await admin
+      .from('reports')
+      .insert({
+        reporter_id: student.id,
+        target_type: 'user',
+        target_id: applicant.id,
+        reason: `${RUN} second report`,
+      })
+      .select('id')
+      .single();
+
+    await student.client.from('reports').update({ status: 'dismissed' }).eq('id', report!.id);
+
+    const { data: after } = await admin
+      .from('reports')
+      .select('status')
+      .eq('id', report!.id)
+      .single();
+    expect(after?.status).toBe('open');
+
+    await admin.from('reports').delete().eq('id', report!.id);
   });
 });

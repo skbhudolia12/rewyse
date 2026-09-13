@@ -53,13 +53,24 @@ export async function startCheckout(listingId: string): Promise<void> {
     redirect(existing.status === 'held' ? `/orders/${existing.id}` : `/checkout/${existing.id}`);
   }
 
+  // An accepted offer is the agreed price; the sticker price is only a
+  // starting point. Charging the asking price after a negotiation would make
+  // the whole offer flow decorative.
+  const { data: accepted } = await supabase
+    .from('offers')
+    .select('amount')
+    .eq('listing_id', listingId)
+    .eq('buyer_id', buyer.id)
+    .eq('status', 'accepted')
+    .maybeSingle();
+
   const { data: payment, error } = await supabase
     .from('payments')
     .insert({
       listing_id: listing.id,
       buyer_id: buyer.id,
       seller_id: listing.seller_id,
-      amount: listing.asking_price,
+      amount: accepted?.amount ?? listing.asking_price,
       status: 'initiated',
     })
     .select('id')

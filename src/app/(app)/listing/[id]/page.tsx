@@ -69,6 +69,16 @@ export default async function ListingDetailPage({
     .eq('active', true)
     .limit(1);
 
+  // Shown on the buy button so a buyer who negotiated sees their price, not
+  // the sticker price.
+  const { data: acceptedOffer } = await supabase
+    .from('offers')
+    .select('amount')
+    .eq('listing_id', id)
+    .eq('buyer_id', viewer.id)
+    .eq('status', 'accepted')
+    .maybeSingle();
+
   const days = daysUntilMoveout(listing.moveout_date, new Date());
   const isOwn = listing.seller_id === viewer.id;
   const hasVideo = images.some((m) => m.kind === 'video');
@@ -193,6 +203,7 @@ export default async function ListingDetailPage({
               <BuyButton
                 listingId={listing.id}
                 sellerFirstName={listing.seller?.full_name?.split(' ')[0] ?? 'seller'}
+                acceptedAmount={acceptedOffer?.amount ?? null}
               />
             )}
           </Card>

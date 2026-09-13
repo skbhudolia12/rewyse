@@ -49,13 +49,12 @@ export default async function AdminHomePage() {
           caption={`${payments.data?.length ?? 0} in hold · ${awaitingRelease} ready to release`}
         />
         <Tile
-          href="/admin/payments"
+          href="/admin/reports"
           icon={<Flag className="size-5" />}
           title="Reports"
           count={reports.data?.length ?? 0}
           urgentAbove={0}
           caption="Flagged listings and threads"
-          disabled
         />
         <Tile
           href="/home"

@@ -9,8 +9,8 @@ Source spec: [`ReWyse_Website_Build_Spec.md`](./ReWyse_Website_Build_Spec.md)
 | 1 | Identity & the trust gate | ✅ **Complete** |
 | 2 | Listing + pricing engine | ✅ **Complete** — see [PHASE2-CHECKLIST.md](./PHASE2-CHECKLIST.md) |
 | 3 | Discovery | ✅ **Complete** |
-| 4 | Transaction — chat, offers, meetups *(pilot opens)* | ⬜ Next |
-| 5 | Profile, trust, ops, hypothesis dashboard | ⬜ |
+| 4 | Transaction — chat, offers, meetups *(pilot opens)* | ✅ **Complete** |
+| 5 | Profile, trust, ops, hypothesis dashboard | ⬜ Next |
 
 ---
 
@@ -164,14 +164,31 @@ Mobile-first at 390px, 44px minimum tap targets, 16px inputs so iOS does not zoo
 - `/search` + filters
 - **Seed ~40 listings across all three campuses before this goes live.** A cluster feed with six items reads as dead.
 
-# Phase 4 — Transaction ⬜  ← pilot opens here
+# Phase 4 — Transaction ✅ Complete
 
-- Chat via Supabase Realtime; sticky listing context; non-dismissible safety banner
-- Structured offers: Accept / Counter / Decline, counter chains, all logged
-- Meetup proposal card: campus-specific `SafeMeetupPoint` chips + date/time picker
-- Status machine: both confirm → `confirmed` + `pending_pickup` → `completed`
-- Email notifications (Resend) + in-app bell
-- Report button on threads and listings → admin queue
+**88 unit · 77 integration · typecheck, lint and build clean**
+
+### Chat
+Realtime over Supabase (`messages`, `offers`, `meetup_proposals` added to the publication — without that the thread renders correctly and simply never updates, which reads as a broken socket rather than a missing line of SQL). Thread list with unread counts, merged timeline of messages, offers and meetups, non-dismissible safety banner, report button.
+
+### Structured offers
+Offer, counter, accept, decline — every transition logged. `suggested_sell_fast_at_offer` is snapshotted onto each row so tuning the pricing prompt later cannot retroactively change what a historical offer is measured against, which is the pilot's whole hypothesis.
+
+**Authority is enforced in Postgres, not the action layer:**
+- The party who *made* an offer cannot accept it — otherwise a buyer accepts their own lowball and walks to checkout at that price.
+- Accepting supersedes every other pending offer on the listing, so a seller cannot accept two buyers for one item.
+- A resolved offer cannot be re-decided.
+- An accepted offer becomes the checkout price; the sticker price is only a starting point.
+
+### Meetups
+Proposed from the pre-approved points on *either* party's campus — cross-campus deals are normal, meeting at a third campus nobody attends is not, and a trigger enforces it. The proposer cannot confirm their own proposal. Accepting moves the conversation to `confirmed` and the listing to `pending_pickup` together, so a scheduled handover always takes the item off the market.
+
+### Safety
+Report button on conversations; `/admin/reports` queue with action-or-dismiss. Only an **actioned** report counts against a trust score — dismissing a bad-faith report costs the reported student nothing, which is what stops report-count-as-weapon.
+
+### Notifications
+Written to the `notifications` table on every offer, message, acceptance and meetup. In-app only for now; the email dispatcher reads the same table and is gated on `RESEND_API_KEY`, so it starts working the moment SMTP is configured without a code change.
+
 
 # Phase 5 — Profile, trust, ops ⬜
 
