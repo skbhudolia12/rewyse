@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Clock, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { Alert, Button, Card, PageHeader } from '@/components/ui';
+import { ShieldCheck as ShieldIcon } from 'lucide-react';
 import { requireProfile } from '@/lib/auth/session';
 
 /**
@@ -56,6 +57,27 @@ export default async function VerifyPage() {
             switched off for everyone who has not cleared both checks — including you.
           </p>
         </div>
+      )}
+
+      {/* Without this, the first admin on a campus has no route to the queue
+          that would verify them -- the student nav is hidden while pending. */}
+      {profile.role === 'admin' && (
+        <Card className="mt-8 space-y-3">
+          <div className="flex items-start gap-3">
+            <ShieldIcon className="text-flame mt-0.5 size-5 shrink-0" />
+            <div>
+              <p className="text-sm font-semibold">You&rsquo;re an admin</p>
+              <p className="text-paper-dim mt-1 text-[13px] leading-relaxed">
+                Your own submission is in the review queue. You can approve it from the console.
+              </p>
+            </div>
+          </div>
+          <Link href="/admin/verifications" className="block">
+            <Button variant="flame" className="w-full">
+              Open the review queue
+            </Button>
+          </Link>
+        </Card>
       )}
 
       <div className="mt-auto pt-10">

@@ -13,11 +13,18 @@ const ITEMS = [
   { href: '/profile', label: 'Profile', icon: User },
 ] as const;
 
-export function BottomNav({ isAdmin }: { isAdmin: boolean }) {
+export function BottomNav({ isAdmin, verified }: { isAdmin: boolean; verified: boolean }) {
   const pathname = usePathname();
-  const items = isAdmin
-    ? [...ITEMS, { href: '/admin', label: 'Admin', icon: ShieldCheck } as const]
-    : ITEMS;
+  const adminItem = { href: '/admin', label: 'Admin', icon: ShieldCheck } as const;
+
+  // An unverified admin gets the console alone: the student actions would still
+  // bounce off the verification gate, and a nav full of dead ends is worse than
+  // a short one.
+  const items = verified
+    ? isAdmin
+      ? [...ITEMS, adminItem]
+      : ITEMS
+    : [adminItem];
 
   return (
     <nav
