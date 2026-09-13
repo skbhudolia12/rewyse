@@ -44,30 +44,33 @@ describe('urgencyFactor', () => {
     expect(urgencyFactor(0)).toBe(URGENCY_FLOOR);
   });
 
-  it('interpolates in the upper part of the window', () => {
-    expect(urgencyFactor(14)).toBeCloseTo(14 / 21, 5);
-  });
-
-  it('never returns a factor outside the floor/ceiling band', () => {
-    for (const days of [-10, 0, 1, 5, 13, 21, 400]) {
-      const factor = urgencyFactor(days);
-      expect(factor).toBeGreaterThanOrEqual(URGENCY_FLOOR);
-      expect(factor).toBeLessThanOrEqual(1);
+  it('moves monotonically: every day closer is never a higher factor', () => {
+    for (let days = 30; days > 0; days -= 1) {
+      expect(urgencyFactor(days - 1)).toBeLessThanOrEqual(urgencyFactor(days));
     }
   });
 
   /**
-   * KNOWN BEHAVIOUR of the spec's formula, pinned here deliberately.
-   *
-   * clamp(days / 21, 0.6, 1.0) reaches its floor at 12.6 days, so every listing
-   * from 12 days out to the move-out day itself prices identically. That is the
-   * exact window the product's pitch is about ("3 weeks out vs 3 days out"), so
-   * this flat region is worth a decision rather than a discovery mid-pilot.
+   * The regression this curve exists to prevent. The spec's original
+   * clamp(days / 21, 0.6, 1.0) floored at 12.6 days, so 12 days out and the
+   * morning of move-out priced identically -- flat across exactly the window
+   * the product is about.
    */
-  it('is flat across the final twelve days (spec formula, see comment)', () => {
-    expect(urgencyFactor(12)).toBe(URGENCY_FLOOR);
-    expect(urgencyFactor(3)).toBe(URGENCY_FLOOR);
-    expect(urgencyFactor(0)).toBe(URGENCY_FLOOR);
+  it('is strictly decreasing across the final two weeks', () => {
+    const days = [14, 12, 10, 7, 5, 3, 2, 1, 0];
+    for (let i = 1; i < days.length; i += 1) {
+      expect(urgencyFactor(days[i]!)).toBeLessThan(urgencyFactor(days[i - 1]!));
+    }
+  });
+
+  it('gives up most of the discount inside the last week, not before it', () => {
+    const total = urgencyFactor(21) - urgencyFactor(0);
+    const lastWeek = urgencyFactor(7) - urgencyFactor(0);
+    expect(lastWeek / total).toBeGreaterThan(0.6);
+  });
+
+  it('is near full price three weeks out', () => {
+    expect(urgencyFactor(18)).toBeGreaterThan(0.97);
   });
 });
 
@@ -121,6 +124,11 @@ describe('computeSuggestion', () => {
     const near = suggest(10_000, 0);
     expect(near.sellFastPrice).toBeLessThan(far.sellFastPrice);
     expect(near.sellFastPrice).toBe(5_100);
+  });
+
+  it('quotes a different price at three days out than at twelve', () => {
+    // The whole pitch in one assertion.
+    expect(suggest(10_000, 3).sellFastPrice).toBeLessThan(suggest(10_000, 12).sellFastPrice);
   });
 
   it('applies the condition multiplier before the band', () => {

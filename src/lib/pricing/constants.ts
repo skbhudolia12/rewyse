@@ -55,6 +55,15 @@ export const URGENCY_WINDOW_DAYS = 21;
 export const URGENCY_FLOOR = 0.6;
 export const URGENCY_CEILING = 1.0;
 
+/**
+ * Decay constant for the urgency curve, in days.
+ *
+ * Smaller = the discount arrives later and bites harder in the final week.
+ * At 7, a seller is near full price three weeks out, has given up about a third
+ * of the discount by one week out, and reaches the floor on move-out day.
+ */
+export const URGENCY_DECAY_DAYS = 7;
+
 /** Prices are surfaced rounded so they read as prices, not as float output. */
 export const PRICE_ROUNDING_STEP = 50;
 

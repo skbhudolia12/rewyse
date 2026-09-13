@@ -115,6 +115,6 @@ You want payment held until the buyer confirms receipt. The spec rules it out in
 
 ## Not blocked, but worth deciding
 
-- **The urgency curve is still flat across the final 12 days.** `clamp(days/21, 0.6, 1.0)` floors at 12.6 days, so 12 days out and 3 days out price identically — the exact window the pitch is about. One line to fix; still pinned in a test that explains why. You said later; it's still later.
+- ~~The urgency curve is flat across the final 12 days.~~ **Fixed.** Replaced with a normalised exponential decay (`URGENCY_DECAY_DAYS = 7`): monotonic everywhere, steepest near the deadline, ~68% of the discount inside the final week. 3 days out now quotes ₹6,350 where 12 days out quotes ₹8,050.
 - **The landing copy is placeholder-grade.** You said the slogans are "meh" — agreed. "Sell it before you leave" and "The same desk is worth less on Sunday" are a first draft of a voice, not a finished one.
 - **`gemini-2.5-flash-lite` was retired mid-build.** `npm run check:llm` caught it; now on `gemini-3.5-flash-lite`. Worth re-running that check before any demo.

@@ -215,7 +215,10 @@ class Component extends DCLogic {
   quote() {
     const base = this.props.baseValue ?? 7500;
     const mult = { full: 1, part: 0.6, parts: 0.3 }[this.state.cond] ?? 1;
-    const urgency = Math.min(Math.max(this.days / 21, 0.6), 1);
+    // Normalised exponential decay, matching rails.ts: steepest near the
+    // deadline, exactly 0.6 on move-out day, exactly 1.0 a full window out.
+    const shape = (d) => 1 - Math.exp(-d / 7);
+    const urgency = this.days >= 21 ? 1 : 0.6 + 0.4 * (shape(this.days) / shape(21));
     const adjusted = base * mult;
     const fairMin = this.round50(adjusted * 0.85);
     const fairMax = Math.max(this.round50(adjusted * 1.05), fairMin + 50);

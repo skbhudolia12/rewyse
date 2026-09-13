@@ -8,8 +8,8 @@ Source spec: [`ReWyse_Website_Build_Spec.md`](./ReWyse_Website_Build_Spec.md)
 | 0 | Foundation — scaffold, schema, RLS, pricing rails | ✅ **Complete** |
 | 1 | Identity & the trust gate | ✅ **Complete** |
 | 2 | Listing + pricing engine | ✅ **Complete** — see [PHASE2-CHECKLIST.md](./PHASE2-CHECKLIST.md) |
-| 3 | Discovery | ⬜ Next |
-| 4 | Transaction — chat, offers, meetups *(pilot opens)* | ⬜ |
+| 3 | Discovery | ✅ **Complete** |
+| 4 | Transaction — chat, offers, meetups *(pilot opens)* | ⬜ Next |
 | 5 | Profile, trust, ops, hypothesis dashboard | ⬜ |
 
 ---
@@ -102,23 +102,23 @@ Zod-validated env split into public/server halves; Supabase browser, server (RLS
 2. **Trust score counts only `actioned` reports.** Spec §7 subtracts 15 per flagged listing; as written, any student could tank a rival's score by filing reports.
 3. **`price_cache` is not granted to `authenticated` at all.** The anon key is public, so a client-writable cache means a forged base value flows into a real seller's price.
 
-### ⚠️ Open decision: the urgency curve
+### ✅ Resolved: the urgency curve
 
-`clamp(days / 21, 0.6, 1.0)` reaches its floor at **12.6 days**, so every listing from 12 days out to move-out day prices *identically* — the exact window the product's pitch is about.
+The spec's `clamp(days / 21, 0.6, 1.0)` floored at 12.6 days, so every listing from twelve days out to the morning of move-out priced identically — flat across exactly the window the product is about.
 
-| Days out | Spec formula | Proposed |
+Replaced with a normalised exponential (`URGENCY_DECAY_DAYS = 7`), steepest near the deadline:
+
+| Days out | Old | Now |
 |---|---|---|
 | 21 | ₹8,500 | ₹8,500 |
-| 12 | ₹5,100 | ₹7,050 |
-| 7 | ₹5,100 | ₹6,250 |
-| 3 | ₹5,100 | ₹5,600 |
+| 14 | ₹5,650 | ₹8,200 |
+| 12 | ₹5,100 | ₹8,050 |
+| 7 | ₹5,100 | ₹7,350 |
+| 3 | ₹5,100 | ₹6,350 |
+| 1 | ₹5,100 | ₹5,600 |
 | 0 | ₹5,100 | ₹5,100 |
 
-Fix is one line — interpolate across the window instead of clamping into it:
-```ts
-urgency = URGENCY_FLOOR + (1 - URGENCY_FLOOR) * clamp(days / 21, 0, 1)
-```
-Currently implemented **as specced**, with the flat region pinned in a test that explains why. Awaiting a decision.
+Monotonic everywhere, hits both endpoints exactly, and ~68% of the discount lands inside the final week — matching how the pressure actually works. Pinned by tests asserting strict decrease across the final fortnight.
 
 ---
 

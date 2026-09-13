@@ -20,6 +20,7 @@ import {
   FAIR_MIN_RATIO,
   PRICE_ROUNDING_STEP,
   URGENCY_CEILING,
+  URGENCY_DECAY_DAYS,
   URGENCY_FLOOR,
   URGENCY_WINDOW_DAYS,
 } from './constants';
@@ -64,13 +65,37 @@ export function daysUntilMoveout(moveoutDate: string | Date, now: Date): number 
 }
 
 /**
- * Scales from 1.0 (a full window or more remaining) down to the floor as the
- * move-out date approaches. Floors rather than reaching zero: past a point,
- * further discounting stops being urgency and starts being a giveaway.
+ * Scales from 1.0 (a full window or more remaining) down to the floor on
+ * move-out day.
+ *
+ * An exponential, not a straight line. The spec's original
+ * `clamp(days / 21, 0.6, 1.0)` hit its floor at 12.6 days, so every listing
+ * from twelve days out to the morning of move-out priced identically -- flat
+ * across exactly the window the product is about. A seller watching their
+ * suggestion not move for twelve days has no reason to believe the engine does
+ * anything.
+ *
+ * `1 - e^(-days/k)` is steepest near zero, which matches how the pressure
+ * actually works: the difference between 14 and 12 days barely matters, the
+ * difference between 3 days and tomorrow matters enormously. Dividing by the
+ * same shape at the window edge normalises it, so the curve passes through both
+ * endpoints exactly: the floor at zero days, the ceiling at a full window.
+ *
+ * Floors rather than reaching zero: past a point, further discounting stops
+ * being urgency and starts being a giveaway.
  */
 export function urgencyFactor(days: number): number {
   const safeDays = Math.max(0, days);
-  return clamp(safeDays / URGENCY_WINDOW_DAYS, URGENCY_FLOOR, URGENCY_CEILING);
+  if (safeDays >= URGENCY_WINDOW_DAYS) return URGENCY_CEILING;
+
+  const shape = (d: number) => 1 - Math.exp(-d / URGENCY_DECAY_DAYS);
+  const normalized = shape(safeDays) / shape(URGENCY_WINDOW_DAYS);
+
+  return clamp(
+    URGENCY_FLOOR + (URGENCY_CEILING - URGENCY_FLOOR) * normalized,
+    URGENCY_FLOOR,
+    URGENCY_CEILING,
+  );
 }
 
 export function conditionMultiplier(status: FunctionalStatus): number {
