@@ -7,16 +7,13 @@ import { createClient } from '@/lib/supabase/client';
 /**
  * Completes an implicit-flow sign-in.
  *
- * Supabase can hand the session back two ways. PKCE puts a `code` in the query
- * string, which the server reads. The implicit flow -- which is what
- * admin-generated links use -- puts the tokens in a URL FRAGMENT, and a
- * fragment is never sent to a server. The route handler therefore saw no
- * parameters at all and bounced to the login page with an error, while the
- * tokens sat unread in the address bar.
+ * Supabase's implicit flow returns the session in a URL FRAGMENT, which is
+ * never transmitted to a server -- so no route handler can see it. The browser
+ * client can, and setSession persists it through the same cookie storage the
+ * server reads on the next request.
  *
- * This reads them on the client, establishes the session, then sends the user
- * to /home and lets the existing guards route them: no profile goes to signup,
- * unverified goes to the pending screen, verified stays.
+ * Sends the user to /home afterwards and lets the existing guards route them:
+ * no profile goes to signup, unverified to the pending screen, verified stays.
  */
 export function FragmentHandler() {
   const router = useRouter();
@@ -43,7 +40,7 @@ export function FragmentHandler() {
       }
 
       // Clear the tokens out of the address bar before moving on.
-      window.history.replaceState(null, '', '/auth/callback');
+      window.history.replaceState(null, '', '/auth/finish');
       router.replace('/home');
     })();
 
