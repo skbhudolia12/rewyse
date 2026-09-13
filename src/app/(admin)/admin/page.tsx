@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { IdCard, Wallet, Flag, Tag } from 'lucide-react';
+import { IdCard, Wallet, Flag, Tag, LineChart } from 'lucide-react';
 import { Card, PageHeader } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
@@ -14,11 +14,12 @@ export default async function AdminHomePage() {
   const admin = await requireAdmin();
   const supabase = await createClient();
 
-  const [ids, payments, reports, listings] = await Promise.all([
+  const [ids, payments, reports, listings, events] = await Promise.all([
     supabase.from('id_verifications').select('id').eq('status', 'pending_review'),
     supabase.from('payments').select('id, buyer_confirmed_at').eq('status', 'held'),
     supabase.from('reports').select('id').eq('status', 'open'),
     supabase.from('listings').select('id').eq('status', 'active'),
+    supabase.from('pricing_events').select('id').not('outcome', 'is', null),
   ]);
 
   const awaitingRelease = (payments.data ?? []).filter((p) => p.buyer_confirmed_at).length;
@@ -63,6 +64,14 @@ export default async function AdminHomePage() {
           count={listings.data?.length ?? 0}
           urgentAbove={Number.POSITIVE_INFINITY}
           caption="Active across the cluster"
+        />
+        <Tile
+          href="/admin/insights"
+          icon={<LineChart className="size-5" />}
+          title="Pilot results"
+          count={events.data?.length ?? 0}
+          urgentAbove={Number.POSITIVE_INFINITY}
+          caption="Does urgency pricing work?"
         />
       </div>
 

@@ -10,7 +10,7 @@ Source spec: [`ReWyse_Website_Build_Spec.md`](./ReWyse_Website_Build_Spec.md)
 | 2 | Listing + pricing engine | ✅ **Complete** — see [PHASE2-CHECKLIST.md](./PHASE2-CHECKLIST.md) |
 | 3 | Discovery | ✅ **Complete** |
 | 4 | Transaction — chat, offers, meetups *(pilot opens)* | ✅ **Complete** |
-| 5 | Profile, trust, ops, hypothesis dashboard | ⬜ Next |
+| 5 | Profile, trust, ops, hypothesis dashboard | ✅ **Complete** |
 
 ---
 
@@ -190,13 +190,31 @@ Report button on conversations; `/admin/reports` queue with action-or-dismiss. O
 Written to the `notifications` table on every offer, message, acceptance and meetup. In-app only for now; the email dispatcher reads the same table and is gated on `RESEND_API_KEY`, so it starts working the moment SMTP is configured without a code change.
 
 
-# Phase 5 — Profile, trust, ops ⬜
+# Phase 5 — Profile, trust, ops ✅ Complete
 
-- `/profile` My Campus Hub per §5.6 + `/profile/:userId`
-- **"Drop Price with AI Assistant"** — re-runs pricing at the shorter days-remaining, logs a new `pricing_event` (second independent data point, cheap since base value is cached)
-- Trust score display (integers only, no ML framing)
-- Admin console v2: report queue, ban/warn, takedown, comparables editor
-- **Hypothesis dashboard**: sell-fast acceptance rate, counter frequency, time-to-sale vs days-to-move-out, price-vs-suggestion distribution — this is what you present
+**88 unit · 85 integration · typecheck, lint and build clean**
+
+### My Campus Hub — `/profile`
+User card with verification and campus, own move-out countdown, three stat tiles, listings and offers tabs. Average response time is deliberately **absent**: it needs message-timestamp aggregation we do not do yet, and a fabricated "15m" is worse than a missing tile.
+
+### Drop Price with Smart Price
+Two-step by design — shows the new number first, drops the price only when the seller agrees. Silently repricing someone's listing would be taking a decision that is theirs. Costs no model quota: the base value is cached under the item's identity and urgency is local arithmetic. Logged with `is_repricing`, which makes it the pilot's **second independent test** of the same hypothesis.
+
+### Edit and remove — `/listing/[id]/edit`
+The Phase 2 deferral, now done. Removal is a soft status change, never a delete: the pricing events and offers attached to a listing are the pilot's measurements, and deleting the row would drop a data point every time someone changed their mind.
+
+### Public seller card — `/profile/[id]`
+Name, campus, trust score, what they have for sale. Deliberately thin — a buyer deciding whether to meet a stranger needs those four things; hostel and move-out date are the seller's to share in chat, not the directory's to publish.
+
+### Pilot dashboard — `/admin/insights`
+The hypothesis, measured: headline acceptance rate, outcome distribution, acceptance bucketed by days-to-move-out, counter rate, repricing acceptance, median gap from suggestion, and engine health.
+
+Two honesty mechanisms built in:
+- Suggestions shown but never acted on are **excluded**. A seller who closed the form mid-way did not reject the price, and counting them as rejections would understate acceptance.
+- Seeded demo rows carry `prompt_version = 'demo-seed'`, are **counted separately**, and the page says on its face when they are present. A fabricated acceptance rate indistinguishable from a real one is how a made-up number reaches a pitch deck.
+
+Colour: one accent. A four-hue categorical palette was checked against this surface and failed CVD separation outright (`#cfcac1` ↔ `#6ee7a8`, ΔE 3.0 deutan). Flame marks the hypothesis; everything else is neutral and every bar is directly labelled, so nothing is encoded by colour alone.
+
 
 ### Deferred by design
 Web push, LLM + live web search pricing, automated ID verification (OCR/face-match), automated chat moderation, multi-cluster expansion.

@@ -8,9 +8,14 @@
  * argue your way out of in a demo. Every row here is tagged so it can be pulled
  * out cleanly before real students arrive.
  *
- * Prices are set directly rather than through the pricing engine: seeding
- * should not spend model quota, and these are illustrative, not measurements.
- * Nothing here writes pricing_events, so the hypothesis ledger stays clean.
+ * Prices are set directly rather than through the pricing engine: seeding should
+ * not spend model quota, and these are illustrative, not measurements.
+ *
+ * It DOES write pricing_events, so the pilot dashboard has something to draw --
+ * every one tagged prompt_version 'demo-seed'. The dashboard counts those
+ * separately and says on its face that seeded rows are present, because a
+ * fabricated acceptance rate that cannot be told from a real one is how a
+ * made-up number ends up in a pitch deck.
  */
 
 import { readFileSync } from 'node:fs';
@@ -73,6 +78,7 @@ async function clear() {
 
   const ids = (sellers ?? []).map((s) => s.id);
   if (ids.length) {
+    await admin.from('pricing_events').delete().in('seller_id', ids);
     const { count } = await admin
       .from('listings')
       .delete({ count: 'exact' })
