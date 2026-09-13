@@ -1,6 +1,7 @@
 import { Card, PageHeader } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
+import { PAYMENTS_QUEUE_SELECT } from '@/lib/admin/queries';
 import { PaymentRow, type HeldPayment } from './payment-row';
 
 export const dynamic = 'force-dynamic';
@@ -18,12 +19,7 @@ export default async function PaymentsQueuePage() {
 
   const { data, error } = await supabase
     .from('payments')
-    .select(
-      `id, amount, status, gateway_reference, buyer_confirmed_at, created_at, admin_note,
-       listing:listings(title),
-       buyer:profiles!payments_buyer_id_fkey(full_name, email),
-       seller:profiles!payments_seller_id_fkey(full_name, email)`,
-    )
+    .select(PAYMENTS_QUEUE_SELECT)
     .order('created_at', { ascending: false })
     .limit(100);
 

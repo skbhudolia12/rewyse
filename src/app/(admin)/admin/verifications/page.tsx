@@ -2,6 +2,7 @@ import { ReviewCard, type PendingReview } from './review-card';
 import { Card, PageHeader } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
+import { PENDING_VERIFICATIONS_SELECT } from '@/lib/admin/queries';
 
 /** Signed URLs are short-lived: an ID photo link must not outlive the review. */
 const SIGNED_URL_TTL_SECONDS = 600;
@@ -26,9 +27,7 @@ export default async function VerificationQueuePage() {
 
   const { data, error } = await supabase
     .from('id_verifications')
-    .select(
-      'id, submitted_at, document_path, profiles!inner(full_name, email, hostel_or_hall, campuses(abbreviation))',
-    )
+    .select(PENDING_VERIFICATIONS_SELECT)
     .eq('status', 'pending_review')
     .order('submitted_at', { ascending: true });
 
