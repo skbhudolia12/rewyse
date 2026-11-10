@@ -1,17 +1,19 @@
 import 'server-only';
-import { createHash } from 'node:crypto';
 import { createAdminClient } from '@/lib/supabase/server';
-import { estimateBaseValue } from './llm';
+import { estimateBaseValue, type EstimatePhoto } from './llm';
+import { cacheKey } from './cache-key';
 import { normalizeTitle } from './parse';
 import {
   CATEGORY_DEFAULT_BASE_VALUE,
   CLEARANCE_WINDOW_DAYS,
   PROMPT_VERSION,
+  URGENCY_WINDOW_DAYS,
 } from './constants';
 import {
   classifyOutcome,
   computeSuggestion,
   daysUntilMoveout,
+  explainUrgency,
   railBaseValue,
   type PriceSuggestion,
 } from './rails';
@@ -40,6 +42,9 @@ export interface QuoteRequest {
   functionalStatus: FunctionalStatus;
   cosmeticFlaws?: string | null;
   accessories?: string | null;
+  description?: string | null;
+  /** Storage path of the first listing photo; shown to the model when present. */
+  photoPath?: string | null;
   moveoutDate: string;
   sellerId: string;
   listingId?: string | null;
@@ -49,7 +54,14 @@ export interface QuoteRequest {
 export interface Quote extends PriceSuggestion {
   baseValue: number;
   baseValueSource: BaseValueSource;
-  reasoning: string;
+  /** What the model took the item to be, when a model answered. */
+  itemIdentified: string | null;
+  /** Why the item is worth its base value. Shown to the seller verbatim. */
+  reasoning: string[];
+  /** What the move-out date did to the price. Always written by code. */
+  urgencyNotes: string[];
+  /** The model was unsure, or no model answered: ask for a sharper title. */
+  lowConfidence: boolean;
   daysUntilMoveout: number;
   isClearance: boolean;
   modelUsed: string | null;
@@ -60,27 +72,18 @@ export interface Quote extends PriceSuggestion {
 /** One seller cannot drain the org-wide model quota on their own. */
 const RATE_LIMIT_PER_HOUR = 20;
 
-function cacheKey(req: QuoteRequest): string {
-  // Deliberately excludes moveoutDate and functionalStatus: neither reaches the
-  // model, so neither may fragment the cache.
-  return createHash('sha256')
-    .update(
-      [
-        req.category,
-        normalizeTitle(req.title),
-        (req.cosmeticFlaws ?? '').trim().toLowerCase(),
-        (req.accessories ?? '').trim().toLowerCase(),
-        PROMPT_VERSION,
-      ].join('|'),
-    )
-    .digest('hex')
-    .slice(0, 32);
-}
+/** Below this, the panel asks for the brand or model instead of standing behind the number. */
+const CONFIDENCE_FLOOR = 0.4;
+
+/** A compressed listing photo is ~300KB; anything far larger is not one of ours. */
+const MAX_PHOTO_BYTES = 2_000_000;
 
 interface ResolvedBase {
   baseValue: number;
   source: BaseValueSource;
-  reasoning: string;
+  itemIdentified: string | null;
+  reasoning: string[];
+  confidence: number | null;
   model: string | null;
   latencyMs: number | null;
   raw: unknown;
@@ -106,18 +109,57 @@ async function fromComparables(req: QuoteRequest): Promise<ResolvedBase | null> 
   return {
     baseValue: match.base_value,
     source: 'comparables',
-    reasoning: 'Based on recent sales of similar items in your cluster.',
+    itemIdentified: null,
+    reasoning: [
+      `Matched to recent ${match.keyword} sales on the Delhi cluster.`,
+      ...(match.note ? [match.note] : []),
+    ],
+    confidence: 1,
     model: null,
     latencyMs: null,
     raw: null,
   };
 }
 
+/**
+ * price_cache.reasoning holds `{ item, points }` as JSON. Rows written before
+ * the structured prompt hold a bare sentence; read those as a single point.
+ */
+function decodeReasoning(raw: string | null): { itemIdentified: string | null; reasoning: string[] } {
+  if (!raw) return { itemIdentified: null, reasoning: ['Based on a previous estimate for this item.'] };
+  try {
+    const parsed = JSON.parse(raw) as { item?: unknown; points?: unknown };
+    if (Array.isArray(parsed.points) && parsed.points.every((p) => typeof p === 'string')) {
+      return {
+        itemIdentified: typeof parsed.item === 'string' ? parsed.item : null,
+        reasoning: parsed.points as string[],
+      };
+    }
+  } catch {
+    // Legacy plain-text row; handled below.
+  }
+  return { itemIdentified: null, reasoning: [raw] };
+}
+
+/**
+ * Fetches the seller's own photo for the model. A path outside the seller's
+ * folder is ignored rather than fetched: the service-role client would read it,
+ * so this check is what keeps one seller from pricing against another's upload.
+ */
+async function loadPhoto(req: QuoteRequest): Promise<EstimatePhoto | null> {
+  if (!req.photoPath || !req.photoPath.startsWith(`${req.sellerId}/`)) return null;
+  const admin = createAdminClient();
+  const { data, error } = await admin.storage.from('listing-media').download(req.photoPath);
+  if (error || !data || data.size > MAX_PHOTO_BYTES) return null;
+  const bytes = Buffer.from(await data.arrayBuffer());
+  return { mimeType: data.type || 'image/jpeg', base64: bytes.toString('base64') };
+}
+
 async function fromCache(key: string): Promise<ResolvedBase | null> {
   const admin = createAdminClient();
   const { data } = await admin
     .from('price_cache')
-    .select('base_value, source, model_used, reasoning, hit_count')
+    .select('base_value, source, model_used, reasoning, confidence, hit_count')
     .eq('cache_key', key)
     .maybeSingle();
 
@@ -131,7 +173,8 @@ async function fromCache(key: string): Promise<ResolvedBase | null> {
   return {
     baseValue: data.base_value,
     source: data.source as BaseValueSource,
-    reasoning: data.reasoning ?? 'Based on a previous estimate for this item.',
+    ...decodeReasoning(data.reasoning),
+    confidence: data.confidence === null ? null : Number(data.confidence),
     model: data.model_used,
     latencyMs: null,
     raw: null,
@@ -165,6 +208,8 @@ async function resolveBaseValue(req: QuoteRequest): Promise<ResolvedBase> {
       functionalStatus: req.functionalStatus,
       cosmeticFlaws: req.cosmeticFlaws ?? null,
       accessories: req.accessories ?? null,
+      description: req.description ?? null,
+      photo: await loadPhoto(req),
     });
 
     if (estimate) {
@@ -176,7 +221,7 @@ async function resolveBaseValue(req: QuoteRequest): Promise<ResolvedBase> {
           base_value: clamped,
           source: 'llm',
           model_used: estimate.model,
-          reasoning: estimate.reasoning,
+          reasoning: JSON.stringify({ item: estimate.itemIdentified, points: estimate.reasoning }),
           confidence: estimate.confidence,
           last_hit_at: new Date().toISOString(),
         },
@@ -186,7 +231,9 @@ async function resolveBaseValue(req: QuoteRequest): Promise<ResolvedBase> {
       return {
         baseValue: clamped,
         source: 'llm',
+        itemIdentified: estimate.itemIdentified,
         reasoning: estimate.reasoning,
+        confidence: estimate.confidence,
         model: estimate.model,
         latencyMs: estimate.latencyMs,
         raw: { provider: estimate.provider, confidence: estimate.confidence },
@@ -197,7 +244,12 @@ async function resolveBaseValue(req: QuoteRequest): Promise<ResolvedBase> {
   return {
     baseValue: CATEGORY_DEFAULT_BASE_VALUE[req.category],
     source: 'category_default',
-    reasoning: 'A typical price for this category. Adjust it if you know better.',
+    itemIdentified: null,
+    reasoning: [
+      'This is a typical campus resale price for the category.',
+      'Add the brand or model to the title and the estimate becomes specific to your item.',
+    ],
+    confidence: null,
     model: null,
     latencyMs: null,
     raw: null,
@@ -241,11 +293,22 @@ export async function getQuote(req: QuoteRequest, now = new Date()): Promise<Quo
     is_repricing: req.isRepricing ?? false,
   });
 
+  const patient = computeSuggestion({
+    baseValue,
+    functionalStatus: req.functionalStatus,
+    daysUntilMoveout: URGENCY_WINDOW_DAYS,
+  });
+
   return {
     ...suggestion,
     baseValue,
     baseValueSource: resolved.source,
+    itemIdentified: resolved.itemIdentified,
     reasoning: resolved.reasoning,
+    urgencyNotes: explainUrgency(days, suggestion, patient.sellFastPrice),
+    lowConfidence:
+      resolved.source === 'category_default' ||
+      (resolved.confidence !== null && resolved.confidence < CONFIDENCE_FLOOR),
     daysUntilMoveout: days,
     isClearance: days <= CLEARANCE_WINDOW_DAYS,
     modelUsed: resolved.model,

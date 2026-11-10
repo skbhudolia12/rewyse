@@ -4,12 +4,13 @@ import {
   computeSuggestion,
   conditionMultiplier,
   daysUntilMoveout,
+  explainUrgency,
   isHighLiquidity,
   isWithinFairRange,
   railBaseValue,
   urgencyFactor,
 } from './rails';
-import { CATEGORY_DEFAULT_BASE_VALUE, URGENCY_FLOOR } from './constants';
+import { CATEGORY_DEFAULT_BASE_VALUE, URGENCY_FLOOR, URGENCY_WINDOW_DAYS } from './constants';
 
 const suggest = (baseValue: number, days: number) =>
   computeSuggestion({ baseValue, functionalStatus: 'fully_working', daysUntilMoveout: days });
@@ -207,5 +208,33 @@ describe('badges', () => {
     expect(isWithinFairRange(s.fairMax, s)).toBe(true);
     expect(isWithinFairRange(s.fairMin - 50, s)).toBe(false);
     expect(isWithinFairRange(s.fairMax + 50, s)).toBe(false);
+  });
+});
+
+describe('explainUrgency', () => {
+  const quoteAt = (days: number) =>
+    computeSuggestion({ baseValue: 6000, functionalStatus: 'fully_working', daysUntilMoveout: days });
+  const patient = quoteAt(URGENCY_WINDOW_DAYS).sellFastPrice;
+
+  it('says there is no discount yet with a full window remaining', () => {
+    const lines = explainUrgency(30, quoteAt(30), patient);
+    expect(lines[0]).toContain('no urgency discount');
+  });
+
+  it('quotes the exact discount the rails applied', () => {
+    const q = quoteAt(5);
+    const expected = Math.round((1 - q.sellFastPrice / q.fairMin) * 100);
+    expect(explainUrgency(5, q, patient)[0]).toContain(`${expected}% below`);
+  });
+
+  it('names the patient price so the seller can see what waiting is worth', () => {
+    expect(explainUrgency(5, quoteAt(5), patient)[1]).toContain(
+      `₹${patient.toLocaleString('en-IN')}`,
+    );
+  });
+
+  it('reads naturally on the last two days', () => {
+    expect(explainUrgency(1, quoteAt(1), patient)[0]).toContain('tomorrow');
+    expect(explainUrgency(0, quoteAt(0), patient)[0]).toContain('today');
   });
 });

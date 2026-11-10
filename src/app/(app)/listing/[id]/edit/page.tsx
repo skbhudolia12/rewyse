@@ -23,7 +23,7 @@ export default async function EditListingPage({ params }: { params: Promise<{ id
   if (listing.seller_id !== me.id) redirect(`/listing/${id}`);
 
   return (
-    <main className="mx-auto w-full max-w-xl space-y-8 px-5 py-8">
+    <main className="mx-auto w-full max-w-xl space-y-8 px-4 py-6 md:py-8">
       <PageHeader eyebrow="Your listing" title="Edit" subtitle={listing.title} />
       <EditForm listing={listing as unknown as EditableListing} />
     </main>

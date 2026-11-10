@@ -32,7 +32,7 @@ export default async function MessagesPage() {
   const threads = (data ?? []) as unknown as ThreadRow[];
 
   return (
-    <main className="mx-auto w-full max-w-2xl space-y-6 px-5 py-8">
+    <main className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6 md:px-8 md:py-8">
       <PageHeader title="Messages" subtitle="Every conversation about an item you're buying or selling." />
 
       {error && (

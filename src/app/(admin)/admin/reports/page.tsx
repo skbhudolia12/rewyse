@@ -21,7 +21,7 @@ export default async function ReportsQueuePage() {
   const closed = rows.filter((r) => r.status !== 'open');
 
   return (
-    <main className="mx-auto w-full max-w-3xl space-y-8 px-5 py-10">
+    <main className="mx-auto w-full max-w-5xl space-y-8 px-4 py-6 md:px-8 md:py-8">
       <PageHeader
         eyebrow="Safety"
         title="Reports"

@@ -141,8 +141,8 @@ export function EditForm({ listing }: { listing: EditableListing }) {
       <Card className="space-y-3">
         <p className="text-sm font-semibold">Take it off the market</p>
         <p className="text-paper-dim text-[13px] leading-relaxed">
-          The listing stops appearing in the feed. Nothing is deleted — the pricing history stays,
-          so the pilot keeps its data.
+          The listing stops appearing in the feed. Nothing is deleted, so its order and pricing
+          history is kept.
         </p>
         <form action={removeAction}>
           <input type="hidden" name="listingId" value={listing.id} />

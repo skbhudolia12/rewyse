@@ -28,7 +28,7 @@ export const viewport: Viewport = {
   // Zoom stays enabled: disabling it is an accessibility failure, and the 16px
   // input rule in globals.css already prevents iOS's focus-zoom jump.
   maximumScale: 5,
-  themeColor: '#0a0a0b',
+  themeColor: '#111214',
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {

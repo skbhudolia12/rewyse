@@ -1,0 +1,466 @@
+[
+  {
+    "slug": "dell-monitor",
+    "demo": true,
+    "cache_key": "91696a0ee8e56eab666bb629a4c7f172",
+    "base_value": 6500,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.95,
+    "reasoning": "{\"item\":\"Dell 24-inch IPS monitor P2419H\",\"points\":[\"This monitor retails new for roughly ₹14,000 in India today.\",\"Two years of use and typical campus demand reduce the value by over half.\",\"Minor scuffs on the stand slightly lower the final resale price.\"]}",
+    "fields": {
+      "category": "electronics",
+      "title": "Dell 24\" IPS monitor P2419H",
+      "cosmeticFlaws": "Minor scuffs on the stand",
+      "accessories": "Power cable and HDMI cable",
+      "description": "Bought in 2023 for my room. No dead pixels and the stand adjusts fully."
+    }
+  },
+  {
+    "slug": "mini-fridge",
+    "demo": true,
+    "cache_key": "16d2667fc2812dbc44efdd238c15700a",
+    "base_value": 4500,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.9,
+    "reasoning": "{\"item\":\"Godrej 45L mini fridge\",\"points\":[\"This compact refrigerator costs roughly ₹9,000 when purchased new today.\",\"Two years of hostel use and student resale trends reduce its value significantly.\",\"A small dent on the left side is the specific detail that lowers the price.\"]}",
+    "fields": {
+      "category": "appliances",
+      "title": "Godrej 45L mini fridge",
+      "cosmeticFlaws": "Small dent on the left side",
+      "accessories": "Both shelves and the ice tray",
+      "description": "Two years old, cools well. Used in my hostel room."
+    }
+  },
+  {
+    "slug": "study-chair",
+    "demo": true,
+    "cache_key": "f2348f83c0ee75de85140a23d1ae7aa2",
+    "base_value": 3500,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.85,
+    "reasoning": "{\"item\":\"Ergonomic mesh study chair\",\"points\":[\"This ergonomic mesh study chair typically retails new for around ₹7,000 in India.\",\"Standard second-hand depreciation on campus drops the value by half.\",\"Slightly worn armrest padding is the main detail pulling the price down.\"]}",
+    "fields": {
+      "category": "furniture",
+      "title": "Ergonomic mesh study chair",
+      "cosmeticFlaws": "Armrest padding slightly worn",
+      "accessories": "Adjustable headrest",
+      "description": "Height and tilt adjust. Comfortable for long study sessions."
+    }
+  },
+  {
+    "slug": "casio-calculator",
+    "demo": false,
+    "cache_key": "5f85369d0bb8253916ac3bd44c57f3a3",
+    "base_value": 800,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.95,
+    "reasoning": "{\"item\":\"Casio fx-991EX scientific calculator\",\"points\":[\"This advanced scientific calculator typically retails new for around ₹1,400 in India.\",\"Calculators depreciate moderately with use, holding good utility for engineering and science students.\",\"Engineering students constantly demand reliable scientific calculators, making this sell very quickly.\"]}",
+    "fields": {
+      "category": "electronics",
+      "title": "Casio fx-991EX scientific calculator",
+      "cosmeticFlaws": "",
+      "accessories": "",
+      "description": ""
+    }
+  },
+  {
+    "slug": "jbl-speaker",
+    "demo": false,
+    "cache_key": "bc5be8fd12b36a1cbeabd52e23c6094d",
+    "base_value": 4500,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.95,
+    "reasoning": "{\"item\":\"JBL Flip 5 Bluetooth Speaker\",\"points\":[\"This portable waterproof speaker typically retails brand new for around ₹9,000 in India.\",\"Portable audio gear loses half its value due to battery wear and standard campus resale trends.\",\"The inclusion of the original charging cable helps retain value for quick peer-to-peer sales.\"]}",
+    "fields": {
+      "category": "electronics",
+      "title": "JBL Flip 5 bluetooth speaker",
+      "cosmeticFlaws": "",
+      "accessories": "Charging cable",
+      "description": ""
+    }
+  },
+  {
+    "slug": "mx-master",
+    "demo": false,
+    "cache_key": "55837fceff67f86c787b22661feabb68",
+    "base_value": 4500,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.95,
+    "reasoning": "{\"item\":\"Logitech MX Master 3 wireless mouse\",\"points\":[\"This high-end productivity mouse typically retails around ₹8,500 new in India.\",\"Standard campus resale depreciation reduces the value by nearly half due to prior use.\",\"Students value ergonomic peripherals for long study sessions, making this a fast seller.\"]}",
+    "fields": {
+      "category": "electronics",
+      "title": "Logitech MX Master 3 mouse",
+      "cosmeticFlaws": "",
+      "accessories": "",
+      "description": ""
+    }
+  },
+  {
+    "slug": "sony-xm4",
+    "demo": false,
+    "cache_key": "34d37246718561903201413123ca940f",
+    "base_value": 12000,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.95,
+    "reasoning": "{\"item\":\"Sony WH-1000XM4 wireless headphones\",\"points\":[\"These premium headphones retail new for around ₹25,000 in India today.\",\"Used electronics face steep student depreciation, cutting the value by half.\",\"The inclusion of the original case and cable helps support a fair campus price.\"]}",
+    "fields": {
+      "category": "electronics",
+      "title": "Sony WH-1000XM4 noise cancelling headphones",
+      "cosmeticFlaws": "",
+      "accessories": "Case and cable",
+      "description": ""
+    }
+  },
+  {
+    "slug": "hp-laptop",
+    "demo": false,
+    "cache_key": "e9dfda160d9083fb55bb5167fcf512d4",
+    "base_value": 32000,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.85,
+    "reasoning": "{\"item\":\"HP Pavilion 15 laptop i5 11th gen 8GB RAM\",\"points\":[\"This laptop retails new for around ₹60,000 in current Indian markets.\",\"Standard campus resale and moderate age reduce the value significantly.\",\"Light scratches on the lid lowered the final estimated price slightly.\"]}",
+    "fields": {
+      "category": "electronics",
+      "title": "HP Pavilion 15 laptop, i5 11th gen, 8GB RAM",
+      "cosmeticFlaws": "Light scratches on the lid",
+      "accessories": "",
+      "description": ""
+    }
+  },
+  {
+    "slug": "kettle",
+    "demo": false,
+    "cache_key": "f07b2fa8c619950f36a39232e2a318e0",
+    "base_value": 1200,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.95,
+    "reasoning": "{\"item\":\"Philips 1.5L electric kettle\",\"points\":[\"This appliance retails brand new for about ₹2,200 in local stores.\",\"Standard second-hand depreciation brings the worth down to ₹1,200 for campus resale.\",\"Students constantly need quick boiling options for tea and noodles, ensuring fast sales.\"]}",
+    "fields": {
+      "category": "appliances",
+      "title": "Philips 1.5L electric kettle",
+      "cosmeticFlaws": "",
+      "accessories": "",
+      "description": ""
+    }
+  },
+  {
+    "slug": "induction",
+    "demo": false,
+    "cache_key": "0992e8fcf8b908016411ccd9175cddb3",
+    "base_value": 1800,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.95,
+    "reasoning": "{\"item\":\"Prestige 1600W Induction Cooktop\",\"points\":[\"This induction cooktop retails brand new for around ₹3,000 in India.\",\"Standard campus depreciation reduces the value by nearly half over time.\",\"Students heavily demand reliable cooking gear and these sell very quickly.\"]}",
+    "fields": {
+      "category": "appliances",
+      "title": "Prestige induction cooktop 1600W",
+      "cosmeticFlaws": "",
+      "accessories": "",
+      "description": ""
+    }
+  },
+  {
+    "slug": "table-fan",
+    "demo": false,
+    "cache_key": "3a09b728818860cffec838a87e1ad3e4",
+    "base_value": 1200,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.9,
+    "reasoning": "{\"item\":\"Usha 3-speed table fan\",\"points\":[\"This standard three-speed table fan typically retails brand new for around ₹2,500.\",\"A used cooling appliance like this loses half its value due to depreciation and typical wear.\",\"Hostel students urgently need reliable cooling and these affordable fans sell very quickly.\"]}",
+    "fields": {
+      "category": "appliances",
+      "title": "Usha table fan, 3 speed",
+      "cosmeticFlaws": "",
+      "accessories": "",
+      "description": ""
+    }
+  },
+  {
+    "slug": "bookshelf",
+    "demo": false,
+    "cache_key": "842c613395948e4ad10165bfbed06cb5",
+    "base_value": 1200,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.8,
+    "reasoning": "{\"item\":\"Wooden bookshelf, 4 shelves\",\"points\":[\"A standard wooden 4-shelf bookshelf typically costs around ₹3,000 when bought new.\",\"Campus furniture depreciates quickly due to regular wear and tear during student moves.\",\"Students look for affordable, sturdy storage solutions that sell reliably at this price.\"]}",
+    "fields": {
+      "category": "furniture",
+      "title": "Wooden bookshelf, 4 shelves",
+      "cosmeticFlaws": "",
+      "accessories": "",
+      "description": ""
+    }
+  },
+  {
+    "slug": "gate-books",
+    "demo": false,
+    "cache_key": "acca55b9e692505a01e3912494e1dc74",
+    "base_value": 1800,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.9,
+    "reasoning": "{\"item\":\"Made Easy GATE CS preparation book set\",\"points\":[\"This complete set of six Made Easy preparation books for GATE computer science costs around ₹4,500 new.\",\"Technical study materials lose about half their retail value quickly as newer editions enter the market.\",\"The inclusion of solved papers significantly improves the appeal and resale value for student buyers.\"]}",
+    "fields": {
+      "category": "books",
+      "title": "GATE CS preparation book set, 6 books",
+      "cosmeticFlaws": "",
+      "accessories": "",
+      "description": "Made Easy series with solved papers"
+    }
+  },
+  {
+    "slug": "clrs",
+    "demo": false,
+    "cache_key": "1ba9f5ff7a9165595dbc9b89afe6f03f",
+    "base_value": 600,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.95,
+    "reasoning": "{\"item\":\"Introduction to Algorithms CLRS 3rd Edition\",\"points\":[\"This classic computer science textbook costs around ₹900 new in its Indian edition.\",\"Standard academic books lose significant value as newer editions replace them in courses.\",\"CS students constantly hunt for affordable reference texts and this sells instantly.\"]}",
+    "fields": {
+      "category": "books",
+      "title": "Introduction to Algorithms (CLRS), 3rd edition",
+      "cosmeticFlaws": "",
+      "accessories": "",
+      "description": ""
+    }
+  },
+  {
+    "slug": "cycle",
+    "demo": false,
+    "cache_key": "d5f5d3410ef5ad933583f0136ce39d85",
+    "base_value": 2500,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.85,
+    "reasoning": "{\"item\":\"Hero single speed bicycle\",\"points\":[\"A basic single speed bicycle from this brand typically retails around ₹5,000 new.\",\"Campus demand for simple commuter bikes keeps resale steady despite heavy depreciation.\",\"The inclusion of a lock and key adds immediate convenience for daily student use.\"]}",
+    "fields": {
+      "category": "other",
+      "title": "Hero single speed bicycle",
+      "cosmeticFlaws": "",
+      "accessories": "Lock and key",
+      "description": ""
+    }
+  },
+  {
+    "slug": "samsung-monitor",
+    "demo": false,
+    "cache_key": "54c7e1f83c9d95a0291a28cfbfb47901",
+    "base_value": 8500,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.9,
+    "reasoning": "{\"item\":\"Samsung 27-inch curved monitor C27F390\",\"points\":[\"This curved monitor retails brand new for around ₹16,000 in India today.\",\"Standard campus depreciation cuts that value in half for second-hand electronics.\",\"The inclusion of an HDMI cable helps secure a fair market price for student buyers.\"]}",
+    "fields": {
+      "category": "electronics",
+      "title": "Samsung 27\" curved monitor C27F390",
+      "cosmeticFlaws": "",
+      "accessories": "HDMI cable",
+      "description": ""
+    }
+  },
+  {
+    "slug": "power-bank",
+    "demo": false,
+    "cache_key": "88ded137fd6fda1b21506622288c325f",
+    "base_value": 1200,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.95,
+    "reasoning": "{\"item\":\"Mi 20000mAh Power Bank\",\"points\":[\"This high-capacity power bank typically retails new for around ₹2,200 in India today.\",\"Portable chargers lose about half their value over time due to battery cycle wear in student life.\",\"Reliable backup power sells quickly on campus since students constantly need charge on the go.\"]}",
+    "fields": {
+      "category": "electronics",
+      "title": "Mi 20000mAh power bank",
+      "cosmeticFlaws": "",
+      "accessories": "",
+      "description": ""
+    }
+  },
+  {
+    "slug": "boat-headphones",
+    "demo": false,
+    "cache_key": "d2303f0f97e7e0da98865a8c06e98602",
+    "base_value": 800,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.95,
+    "reasoning": "{\"item\":\"boAt Rockerz 450 Bluetooth Headphones\",\"points\":[\"These on-ear wireless headphones typically retail new for around ₹1,500 in India.\",\"Standard second-hand depreciation cuts that value by nearly half for student resale.\",\"Campus buyers want affordable audio gear and this model sells quickly if well-maintained.\"]}",
+    "fields": {
+      "category": "electronics",
+      "title": "boAt Rockerz 450 bluetooth headphones",
+      "cosmeticFlaws": "",
+      "accessories": "",
+      "description": ""
+    }
+  },
+  {
+    "slug": "k380",
+    "demo": false,
+    "cache_key": "7b101e8a6c63e32ba4edb5bddde34f0d",
+    "base_value": 1800,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.95,
+    "reasoning": "{\"item\":\"Logitech K380 Bluetooth Keyboard\",\"points\":[\"This wireless keyboard sells new for around ₹3,000 in India today.\",\"Normal second-hand depreciation brings the campus value down to ₹1,800.\",\"Students love portable keyboards for laptop setups, so it sells very fast.\"]}",
+    "fields": {
+      "category": "electronics",
+      "title": "Logitech K380 bluetooth keyboard",
+      "cosmeticFlaws": "",
+      "accessories": "",
+      "description": ""
+    }
+  },
+  {
+    "slug": "kindle",
+    "demo": false,
+    "cache_key": "28fd011b9426d461f879d3b0cfa8ae64",
+    "base_value": 5500,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.95,
+    "reasoning": "{\"item\":\"Kindle Paperwhite 10th Generation\",\"points\":[\"This e-reader typically retails brand new around ₹10,999 in the Indian market today.\",\"Campus resale value drops due to age and normal depreciation for electronic devices.\",\"A small scratch on the back reduces the final estimate slightly while remaining fully functional.\"]}",
+    "fields": {
+      "category": "electronics",
+      "title": "Kindle Paperwhite 10th generation",
+      "cosmeticFlaws": "Small scratch on the back",
+      "accessories": "",
+      "description": ""
+    }
+  },
+  {
+    "slug": "heater",
+    "demo": false,
+    "cache_key": "6b33bf27d06a65bd737dfbfe9f47e756",
+    "base_value": 1200,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.9,
+    "reasoning": "{\"item\":\"Bajaj 2000W room heater\",\"points\":[\"This is a standard 2000W fan heater that retails new for around ₹2,500.\",\"Typical winter use and standard depreciation reduce the campus resale value.\",\"Students need affordable winter warmth, making these quick to sell in peak months.\"]}",
+    "fields": {
+      "category": "appliances",
+      "title": "Bajaj 2000W room heater",
+      "cosmeticFlaws": "",
+      "accessories": "",
+      "description": ""
+    }
+  },
+  {
+    "slug": "steam-iron",
+    "demo": false,
+    "cache_key": "539466bcaa4e7097d096f1c8cd384bf8",
+    "base_value": 900,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.95,
+    "reasoning": "{\"item\":\"Philips steam iron 1440W\",\"points\":[\"This 1440W steam iron typically retails new for around ₹2,200 in the local market.\",\"Standard campus depreciation brings the resale value down by more than half over time.\",\"Hostel residents frequently need reliable irons, making this a fast-selling essential.\"]}",
+    "fields": {
+      "category": "appliances",
+      "title": "Philips steam iron 1440W",
+      "cosmeticFlaws": "",
+      "accessories": "",
+      "description": ""
+    }
+  },
+  {
+    "slug": "badminton",
+    "demo": false,
+    "cache_key": "5093ec93d9d20ad0cf31edf1a46942d0",
+    "base_value": 1200,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.85,
+    "reasoning": "{\"item\":\"Yonex Nanoray badminton racket\",\"points\":[\"This entry-level badminton racket typically sells new for around ₹2,500.\",\"Standard campus resale and moderate aging reduce the value to half of retail.\",\"The inclusion of a protective cover helps maintain this fair second-hand price.\"]}",
+    "fields": {
+      "category": "other",
+      "title": "Yonex Nanoray badminton racket",
+      "cosmeticFlaws": "",
+      "accessories": "Cover",
+      "description": ""
+    }
+  },
+  {
+    "slug": "football",
+    "demo": false,
+    "cache_key": "cb69df821f2ffe099595174c430104ae",
+    "base_value": 600,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.9,
+    "reasoning": "{\"item\":\"Cosco size 5 football\",\"points\":[\"It is a standard training football that typically costs around ₹1,200 new.\",\"Regular use and wear on campus reduce its resale value by half.\",\"Students look for affordable gear for casual games, and durable balls sell quickly.\"]}",
+    "fields": {
+      "category": "other",
+      "title": "Cosco football, size 5",
+      "cosmeticFlaws": "",
+      "accessories": "",
+      "description": ""
+    }
+  },
+  {
+    "slug": "wooden-stool",
+    "demo": false,
+    "cache_key": "5c5829ebb0d6a91aa37826059dbcd6ed",
+    "base_value": 1200,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.85,
+    "reasoning": "{\"item\":\"Solid sheesham wood stool\",\"points\":[\"This solid sheesham wood stool costs around ₹2,500 brand new in local markets.\",\"Standard campus depreciation and moderate use reduce the value to less than half.\",\"Students look for sturdy seating that saves space and resells fairly quickly.\"]}",
+    "fields": {
+      "category": "furniture",
+      "title": "Solid sheesham wood stool",
+      "cosmeticFlaws": "",
+      "accessories": "",
+      "description": ""
+    }
+  },
+  {
+    "slug": "bedside-table",
+    "demo": false,
+    "cache_key": "92b12f963558dd336c97da308cadf20d",
+    "base_value": 1200,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.85,
+    "reasoning": "{\"item\":\"Wooden bedside cabinet with drawer\",\"points\":[\"A basic wooden bedside table typically costs around ₹3,000 new in local markets.\",\"Standard campus depreciation brings the value down to about ₹1,200 for a used unit.\",\"Students look for affordable bedroom storage and this item usually sells quickly.\"]}",
+    "fields": {
+      "category": "furniture",
+      "title": "Wooden bedside cabinet with drawer",
+      "cosmeticFlaws": "",
+      "accessories": "",
+      "description": ""
+    }
+  },
+  {
+    "slug": "desk-lamp",
+    "demo": false,
+    "cache_key": "65f9ede3c1191fb8030bc53c686e6f82",
+    "base_value": 450,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.9,
+    "reasoning": "{\"item\":\"Fabric shade desk lamp\",\"points\":[\"This standard desk lamp usually costs around ₹1,200 new in retail stores.\",\"Used lighting depreciates quickly, dropping to under half price for student buyers.\",\"Hostel rooms need simple study lights, so functional lamps sell reliably fast.\"]}",
+    "fields": {
+      "category": "furniture",
+      "title": "Desk lamp with fabric shade",
+      "cosmeticFlaws": "",
+      "accessories": "",
+      "description": ""
+    }
+  },
+  {
+    "slug": "whiteboard",
+    "demo": false,
+    "cache_key": "618a311e3cea93416455da7d11772fd3",
+    "base_value": 600,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.9,
+    "reasoning": "{\"item\":\"Whiteboard 2x3 ft with markers\",\"points\":[\"A standard 2x3 foot whiteboard typically retails new for around ₹1,200 in local markets.\",\"Basic study room furniture and accessories generally depreciate to half their value for campus resale.\",\"The inclusion of four markers and a duster provides immediate utility and maintains a fair price.\"]}",
+    "fields": {
+      "category": "other",
+      "title": "Whiteboard 2x3 ft with markers",
+      "cosmeticFlaws": "",
+      "accessories": "Four markers and a duster",
+      "description": ""
+    }
+  },
+  {
+    "slug": "backpack",
+    "demo": false,
+    "cache_key": "770db0ac4cff6539b2bc9f9eb9524a78",
+    "base_value": 1200,
+    "model_used": "gemini-3.5-flash-lite",
+    "confidence": 0.9,
+    "reasoning": "{\"item\":\"Wildcraft 45L backpack\",\"points\":[\"This sturdy rucksack typically retails new for around ₹3,000 in India.\",\"Campus wear and tear drops the value significantly for student budgets.\",\"Students need reliable travel bags and this usually sells within days.\"]}",
+    "fields": {
+      "category": "other",
+      "title": "Wildcraft 45L backpack",
+      "cosmeticFlaws": "",
+      "accessories": "",
+      "description": ""
+    }
+  }
+]

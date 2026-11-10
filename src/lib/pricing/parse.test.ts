@@ -8,11 +8,21 @@ import {
 } from './parse';
 import { railBaseValue } from './rails';
 
-const validJson = JSON.stringify({
-  base_value_inr: 7500,
-  confidence: 0.8,
-  reasoning: 'A three-year-old 24-inch IPS panel sells around this on campus.',
-});
+const POINTS = [
+  'A 24-inch IPS panel from Dell retails near ₹11,000 new.',
+  'Two to three years of use typically halves that on campus.',
+];
+
+const estimate = (overrides: Record<string, unknown> = {}) =>
+  JSON.stringify({
+    item_identified: 'Dell 24" IPS monitor',
+    base_value_inr: 7500,
+    confidence: 0.8,
+    reasoning: POINTS,
+    ...overrides,
+  });
+
+const validJson = estimate();
 
 const geminiBody = (text: string) => ({ candidates: [{ content: { parts: [{ text }] } }] });
 const groqBody = (content: string) => ({ choices: [{ message: { content } }] });
@@ -88,37 +98,49 @@ describe('parseEstimate', () => {
   it.each([
     ['prose instead of JSON', 'I estimate around 7500 rupees.'],
     ['markdown-fenced JSON', '```json\n{"base_value_inr":7500}\n```'],
-    ['missing a field', '{"base_value_inr":7500,"confidence":0.8}'],
-    ['a string price', '{"base_value_inr":"7500","confidence":0.8,"reasoning":"x"}'],
-    ['a negative price', '{"base_value_inr":-500,"confidence":0.8,"reasoning":"x"}'],
-    ['zero', '{"base_value_inr":0,"confidence":0.8,"reasoning":"x"}'],
-    ['confidence above 1', '{"base_value_inr":7500,"confidence":8,"reasoning":"x"}'],
-    ['an empty reasoning', '{"base_value_inr":7500,"confidence":0.8,"reasoning":""}'],
-    ['Infinity', '{"base_value_inr":1e999,"confidence":0.8,"reasoning":"x"}'],
+    ['missing the item', estimate({ item_identified: undefined })],
+    ['a string price', estimate({ base_value_inr: '7500' })],
+    ['a negative price', estimate({ base_value_inr: -500 })],
+    ['zero', estimate({ base_value_inr: 0 })],
+    ['confidence above 1', estimate({ confidence: 8 })],
+    ['reasoning as one string', estimate({ reasoning: 'Sells around this.' })],
+    ['a single reasoning point', estimate({ reasoning: [POINTS[0]] })],
+    ['an empty reasoning point', estimate({ reasoning: [POINTS[0], ''] })],
+    ['Infinity', '{"item_identified":"x y","base_value_inr":1e999,"confidence":0.8,"reasoning":[]}'],
     ['a JSON array', '[7500]'],
     ['empty string', ''],
   ])('rejects %s', (_label, text) => {
     expect(parseEstimate(text)).toBeNull();
   });
 
-  it('rejects an over-long reasoning rather than letting it into the UI', () => {
-    const long = JSON.stringify({
-      base_value_inr: 7500,
-      confidence: 0.8,
-      reasoning: 'x'.repeat(500),
-    });
-    expect(parseEstimate(long)).toBeNull();
+  it('rejects an over-long point rather than letting it into the UI', () => {
+    expect(parseEstimate(estimate({ reasoning: [POINTS[0], 'x'.repeat(500)] }))).toBeNull();
+  });
+
+  it('rejects a look-alike glyph where the rupee sign belongs', () => {
+    expect(parseEstimate(estimate({ reasoning: [POINTS[0], 'Retails new for around ‹3,000 in India.'] }))).toBeNull();
+  });
+
+  it('accepts the rupee sign, quotes and dashes', () => {
+    const points = ['Retails new for about ₹14,000 — “a solid buy”.', "It's 2–3 years old, so 50% off is fair."];
+    expect(parseEstimate(estimate({ reasoning: points }))?.reasoning).toEqual(points);
+  });
+
+  it('keeps the first four points when the model returns more', () => {
+    const six = Array.from({ length: 6 }, (_, i) => `Reasoning point number ${i + 1}.`);
+    expect(parseEstimate(estimate({ reasoning: six }))?.reasoning).toHaveLength(4);
+  });
+
+  it('trims whitespace around each point', () => {
+    const parsed = parseEstimate(estimate({ reasoning: [`  ${POINTS[0]}  `, POINTS[1]] }));
+    expect(parsed?.reasoning[0]).toBe(POINTS[0]);
   });
 });
 
 describe('parse and rails together', () => {
   it('clamps an order-of-magnitude hallucination that survives schema validation', () => {
     // Schema-valid, semantically absurd: 50 lakh for a textbook.
-    const text = JSON.stringify({
-      base_value_inr: 5_000_000,
-      confidence: 0.9,
-      reasoning: 'Rare edition.',
-    });
+    const text = estimate({ base_value_inr: 5_000_000, confidence: 0.9 });
     const parsed = parseEstimate(text);
     expect(parsed).not.toBeNull();
     expect(railBaseValue(parsed!.base_value_inr, 'books')).toBe(5_000);

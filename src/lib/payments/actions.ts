@@ -7,16 +7,15 @@ import { createClient } from '@/lib/supabase/server';
 import { requireVerified, requireAdmin } from '@/lib/auth/session';
 
 /**
- * Simulated escrow.
+ * Simulated escrow with ReWyse-run delivery.
  *
- * NOTHING HERE MOVES REAL MONEY. There is no payment provider, no card, no
- * settlement. The purpose is to let pilot students walk the hold-and-release
- * journey so we learn whether it makes them trust the marketplace — which is
- * the actual question, and one that does not need real rupees to answer.
+ * NOTHING HERE MOVES REAL MONEY. There is no payment provider and no
+ * settlement; every row is marked is_simulated in the database.
  *
- * The state machine is enforced in Postgres (guard_payment_transition), not
- * here: a buyer must not be able to release their own payment by calling an
- * action directly, and application code is not where that guarantee belongs.
+ * Prices, state transitions and the listing's status are all decided in
+ * Postgres (0009_commerce.sql): this file only expresses intent. A buyer who
+ * skips the UI and calls the API directly gets the same rules, because the
+ * rules are not here.
  */
 
 export interface PaymentActionState {
@@ -24,23 +23,24 @@ export interface PaymentActionState {
   message?: string;
 }
 
-/** Buyer starts a purchase. Creates the record, then hands off to the gateway. */
+export type CaptureResult = { ok: true; orderId: string } | { ok: false; error: string };
+
+/** Buyer starts a purchase. The database prices it; this only says what is being bought. */
 export async function startCheckout(listingId: string): Promise<void> {
   const buyer = await requireVerified();
   const supabase = await createClient();
 
   const { data: listing, error: listingError } = await supabase
     .from('listings')
-    .select('id, seller_id, asking_price, status')
+    .select('id, seller_id, status')
     .eq('id', listingId)
     .maybeSingle();
 
   if (listingError || !listing) redirect(`/listing/${listingId}?error=not_found`);
   if (listing.seller_id === buyer.id) redirect(`/listing/${listingId}?error=own_listing`);
-  if (listing.status !== 'active') redirect(`/listing/${listingId}?error=unavailable`);
 
-  // Resume rather than duplicate: a buyer who abandoned the gateway and came
-  // back should land on the same payment, not create a second one.
+  // Resume rather than duplicate: a buyer who left checkout and came back
+  // lands on the same order.
   const { data: existing } = await supabase
     .from('payments')
     .select('id, status')
@@ -52,27 +52,11 @@ export async function startCheckout(listingId: string): Promise<void> {
   if (existing) {
     redirect(existing.status === 'held' ? `/orders/${existing.id}` : `/checkout/${existing.id}`);
   }
-
-  // An accepted offer is the agreed price; the sticker price is only a
-  // starting point. Charging the asking price after a negotiation would make
-  // the whole offer flow decorative.
-  const { data: accepted } = await supabase
-    .from('offers')
-    .select('amount')
-    .eq('listing_id', listingId)
-    .eq('buyer_id', buyer.id)
-    .eq('status', 'accepted')
-    .maybeSingle();
+  if (listing.status !== 'active') redirect(`/listing/${listingId}?error=unavailable`);
 
   const { data: payment, error } = await supabase
     .from('payments')
-    .insert({
-      listing_id: listing.id,
-      buyer_id: buyer.id,
-      seller_id: listing.seller_id,
-      amount: accepted?.amount ?? listing.asking_price,
-      status: 'initiated',
-    })
+    .insert({ listing_id: listing.id, buyer_id: buyer.id, seller_id: listing.seller_id })
     .select('id')
     .single();
 
@@ -84,61 +68,58 @@ export async function startCheckout(listingId: string): Promise<void> {
   redirect(`/checkout/${payment.id}`);
 }
 
+const captureInput = z.object({
+  paymentId: z.string().uuid(),
+  hostel: z.string().trim().min(2, 'Add your hostel or block.').max(80),
+  room: z.string().trim().min(1, 'Add your room number.').max(20),
+  method: z.enum(['upi', 'card', 'netbanking']),
+});
+
+const METHOD_LABELS = { upi: 'UPI', card: 'Card', netbanking: 'Netbanking' } as const;
+
 /**
- * The simulated gateway "captures" the payment.
+ * The simulated gateway "captures" the payment, which puts it in hold and
+ * dispatches a delivery partner (both done by the database trigger).
  *
- * In a real integration this is a webhook from the provider, never a button the
- * browser presses. It is a button here precisely because there is no provider.
+ * In a real integration this is the provider's webhook, never a browser call.
  */
-export async function simulateGatewayCapture(
-  _prev: PaymentActionState,
-  formData: FormData,
-): Promise<PaymentActionState> {
+export async function capturePayment(raw: unknown): Promise<CaptureResult> {
   const buyer = await requireVerified();
-  const paymentId = z.string().uuid().safeParse(formData.get('paymentId'));
-  if (!paymentId.success) return { error: 'That payment could not be found.' };
+  const parsed = captureInput.safeParse(raw);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? 'Check your delivery details.' };
+  }
+  const { paymentId, hostel, room, method } = parsed.data;
 
   const supabase = await createClient();
-  const { data: payment } = await supabase
+  const { data, error } = await supabase
     .from('payments')
-    .select('id, buyer_id, listing_id, status')
-    .eq('id', paymentId.data)
+    .update({
+      delivery_address: `${hostel}, Room ${room}`,
+      payment_method: METHOD_LABELS[method],
+      status: 'held',
+    })
+    .eq('id', paymentId)
+    .eq('buyer_id', buyer.id)
+    .eq('status', 'initiated')
+    .select('id')
     .maybeSingle();
 
-  if (!payment || payment.buyer_id !== buyer.id) {
-    return { error: 'That payment could not be found.' };
-  }
-  if (payment.status !== 'initiated') {
-    redirect(`/orders/${payment.id}`);
-  }
+  if (error) return { ok: false, error: `Payment failed: ${error.message}` };
+  if (!data) return { ok: false, error: 'This order was already paid or has expired.' };
 
-  const { error } = await supabase
-    .from('payments')
-    .update({ status: 'held' })
-    .eq('id', payment.id);
-
-  if (error) return { error: `The gateway declined: ${error.message}` };
-
-  // Take the item off the market while it is in hold.
-  await supabase
-    .from('listings')
-    .update({ status: 'pending_pickup' })
-    .eq('id', payment.listing_id);
-
-  redirect(`/orders/${payment.id}?paid=1`);
+  revalidatePath('/orders');
+  return { ok: true, orderId: data.id };
 }
 
-/**
- * Buyer confirms they have the item in hand. This is the green light the
- * release depends on -- the trigger refuses to release without it.
- */
+/** Buyer confirms the delivered item matches the listing. Release depends on it. */
 export async function confirmReceipt(
   _prev: PaymentActionState,
   formData: FormData,
 ): Promise<PaymentActionState> {
   const buyer = await requireVerified();
   const paymentId = z.string().uuid().safeParse(formData.get('paymentId'));
-  if (!paymentId.success) return { error: 'That payment could not be found.' };
+  if (!paymentId.success) return { error: 'That order could not be found.' };
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -148,10 +129,47 @@ export async function confirmReceipt(
     .eq('buyer_id', buyer.id)
     .eq('status', 'held');
 
-  if (error) return { error: `Could not record your confirmation: ${error.message}` };
+  if (error) return { error: `Your confirmation wasn't saved: ${error.message}` };
 
   revalidatePath(`/orders/${paymentId.data}`);
-  return { message: 'Thanks — the seller will be paid out shortly.' };
+  return { message: 'Thanks. The seller will be paid shortly.' };
+}
+
+const NEXT_DELIVERY_STEP = {
+  scheduled: 'picked_up',
+  picked_up: 'out_for_delivery',
+  out_for_delivery: 'delivered',
+} as const;
+
+/** Operations moves a delivery one step forward, standing in for the partner's tracking feed. */
+export async function advanceDelivery(
+  _prev: PaymentActionState,
+  formData: FormData,
+): Promise<PaymentActionState> {
+  await requireAdmin();
+  const paymentId = z.string().uuid().safeParse(formData.get('paymentId'));
+  if (!paymentId.success) return { error: 'That order could not be found.' };
+
+  const supabase = await createClient();
+  const { data: payment } = await supabase
+    .from('payments')
+    .select('delivery_status')
+    .eq('id', paymentId.data)
+    .maybeSingle();
+
+  const current = payment?.delivery_status as keyof typeof NEXT_DELIVERY_STEP | undefined;
+  const next = current ? NEXT_DELIVERY_STEP[current] : undefined;
+  if (!next) return { error: 'This delivery has no next step.' };
+
+  const { error } = await supabase
+    .from('payments')
+    .update({ delivery_status: next })
+    .eq('id', paymentId.data);
+
+  if (error) return { error: `The delivery wasn't updated: ${error.message}` };
+
+  revalidatePath('/admin/payments');
+  return { message: next };
 }
 
 const adminDecision = z.object({
@@ -161,11 +179,10 @@ const adminDecision = z.object({
 });
 
 /**
- * Admin releases held funds to the seller, or refunds the buyer.
+ * Admin pays the seller out, or refunds the buyer.
  *
- * Release is deliberately a human decision even though the buyer has already
- * confirmed: during a pilot, the person clicking this is the safety net for
- * anything the flow did not anticipate.
+ * Release stays a human decision even after the buyer confirms: the person
+ * clicking it is the safety net for anything the flow did not anticipate.
  */
 export async function resolvePayment(
   _prev: PaymentActionState,
@@ -178,22 +195,22 @@ export async function resolvePayment(
     decision: formData.get('decision'),
     note: formData.get('note') || undefined,
   });
-  if (!parsed.success) return { error: 'Invalid decision.' };
+  if (!parsed.success) return { error: 'That decision could not be read.' };
   const { paymentId, decision, note } = parsed.data;
 
   if (decision === 'refund' && !note) {
-    return { error: 'Give a reason when refunding, so there is a record of why.' };
+    return { error: 'Add a reason for the refund, so there is a record of why.' };
   }
 
   const supabase = await createClient();
   const { data: payment } = await supabase
     .from('payments')
-    .select('id, listing_id, status, buyer_confirmed_at')
+    .select('id, status, buyer_confirmed_at')
     .eq('id', paymentId)
     .maybeSingle();
 
-  if (!payment) return { error: 'That payment could not be found.' };
-  if (payment.status !== 'held') return { error: `This payment is ${payment.status}.` };
+  if (!payment) return { error: 'That order could not be found.' };
+  if (payment.status !== 'held') return { error: `This order is already ${payment.status}.` };
   if (decision === 'release' && !payment.buyer_confirmed_at) {
     return { error: 'The buyer has not confirmed receipt yet.' };
   }
@@ -208,18 +225,9 @@ export async function resolvePayment(
     )
     .eq('id', paymentId);
 
-  if (error) return { error: `Could not record the decision: ${error.message}` };
-
-  await supabase
-    .from('listings')
-    .update({ status: decision === 'release' ? 'completed' : 'active' })
-    .eq('id', payment.listing_id);
+  if (error) return { error: `The decision wasn't saved: ${error.message}` };
 
   revalidatePath('/admin/payments');
-  return {
-    message:
-      decision === 'release'
-        ? 'Released to the seller. (Simulated — no money moved.)'
-        : 'Refunded to the buyer. (Simulated — no money moved.)',
-  };
+  revalidatePath('/admin');
+  return { message: decision === 'release' ? 'Payout sent to the seller.' : 'Refunded to the buyer.' };
 }

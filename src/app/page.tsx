@@ -1,159 +1,102 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { ArrowRight, Camera, MapPin, ShieldCheck } from 'lucide-react';
+import { Camera, PackageCheck, ShieldCheck, Sparkles } from 'lucide-react';
 import { Button, Wordmark } from '@/components/ui';
 import { getUser } from '@/lib/auth/session';
+import { computeSuggestion } from '@/lib/pricing/rails';
+import { formatINR } from '@/lib/utils';
 
-const TICKER = [
-  'MOVE-OUT CLEARANCE',
-  'STUDY TABLE · 4 DAYS LEFT',
-  'IIITD → IITD → DTU',
-  'MINI FRIDGE · 2 DAYS LEFT',
-  'VERIFIED STUDENTS ONLY',
-  'MONITOR · 6 DAYS LEFT',
-];
+/** Real output of the pricing rails for one example item, not illustrative numbers. */
+const EXAMPLE_BASE = 6000;
+const EXAMPLE_DAYS = [21, 10, 5, 2] as const;
 
 export default async function LandingPage() {
   // A signed-in student has no reason to read the pitch again.
   if (await getUser()) redirect('/home');
 
   return (
-    <main className="grid-paper flex-1">
-      <nav className="border-hairline flex items-center justify-between border-b px-6 py-5 md:px-16">
-        <Wordmark />
-        <div className="text-paper-dim hidden items-center gap-10 text-sm font-medium md:flex">
-          <span>Browse</span>
-          <span>How pricing works</span>
-          <span>Campuses</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <Link href="/login" className="text-paper-dim hover:text-paper text-sm font-medium">
-            Sign in
-          </Link>
-          <Link href="/signup">
-            <Button variant="flame" className="rounded-full">
-              Start selling
-              <ArrowRight className="size-4" />
-            </Button>
-          </Link>
+    <main className="flex-1">
+      <nav className="border-hairline border-b">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-4 md:px-8">
+          <Wordmark />
+          <div className="flex items-center gap-2">
+            <Link
+              href="/login"
+              className="text-paper-dim hover:text-paper flex min-h-11 items-center px-3 text-sm font-medium"
+            >
+              Sign in
+            </Link>
+            <Link href="/signup">
+              <Button variant="flame">Join with your college email</Button>
+            </Link>
+          </div>
         </div>
       </nav>
 
-      <section className="mx-auto grid w-full max-w-[1400px] gap-16 px-6 py-16 md:px-16 md:py-24 lg:grid-cols-[1fr_400px]">
+      <section className="mx-auto grid w-full max-w-7xl items-center gap-14 px-5 py-14 md:px-8 md:py-24 lg:grid-cols-[1fr_440px]">
         <div>
-          <div className="border-hairline-strong text-paper-dim mb-8 inline-flex items-center gap-2.5 rounded-full border px-4 py-2 text-[13px] font-medium">
-            <span className="bg-flame inline-block size-1.5 rounded-full" />
-            Live across IIITD · IITD · DTU
-          </div>
-
-          <h1 className="font-display text-6xl md:text-8xl">
-            Sell it before
-            <br />
-            you <span className="text-flame">leave.</span>
-          </h1>
-
-          <p className="text-paper-dim mt-8 max-w-xl text-lg leading-relaxed">
-            A marketplace for verified students only. Tell us your move-out date and we price your
-            stuff to actually sell before it — not to sit unsold while you pack.
+          <p className="text-paper-dim text-sm font-medium">
+            For verified students at IIIT Delhi, IIT Delhi and DTU
           </p>
-
-          <div className="mt-10 flex flex-wrap gap-3.5">
+          <h1 className="font-display mt-5 text-5xl md:text-7xl">Sell it before you leave.</h1>
+          <p className="text-paper-dim mt-6 max-w-xl text-lg leading-relaxed">
+            List your room stuff in a minute. ReWyse prices it for your move-out date, delivers it
+            to the buyer, and holds the payment until they confirm it arrived as described.
+          </p>
+          <div className="mt-9 flex flex-wrap gap-3">
             <Link href="/signup">
-              <Button variant="flame" size="lg" className="rounded-full">
-                List your first item
-                <ArrowRight className="size-4" />
+              <Button variant="flame" size="lg">
+                Start selling
               </Button>
             </Link>
             <Link href="/login">
-              <Button variant="secondary" size="lg" className="rounded-full">
-                Browse your campus
+              <Button variant="secondary" size="lg">
+                Browse items
               </Button>
             </Link>
           </div>
-
-          <dl className="mt-16 flex flex-wrap gap-x-12 gap-y-6">
-            <Stat value="3" label="campuses, one cluster" />
-            <Stat value="0%" label="commission, ever" />
-            <Stat value="48h" label="typical sale near move-out" flame />
-          </dl>
         </div>
 
-        <CountdownCard />
+        <PriceDropCard />
       </section>
 
-      <div className="border-hairline bg-flame text-ink overflow-hidden border-y py-4">
-        <div className="ticker-track">
-          {[0, 1].map((copy) => (
-            <span key={copy} className="flex shrink-0" aria-hidden={copy === 1}>
-              {TICKER.map((text, i) => (
-                <span
-                  key={text}
-                  className={`font-display px-7 text-xl ${i % 2 ? 'opacity-45' : ''}`}
-                >
-                  {text}
-                </span>
-              ))}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <section className="mx-auto w-full max-w-[1400px] px-6 py-20 md:px-16 md:py-28">
-        <h2 className="font-display max-w-3xl text-4xl md:text-5xl">
-          Three steps. No haggling in a hostel corridor.
-        </h2>
-        <div className="mt-14 grid gap-5 md:grid-cols-3">
-          <Step
-            n="01"
-            icon={<ShieldCheck className="size-5" />}
-            title="Prove you're a student"
-            body="College email plus a photo of your ID card, checked by a person. Your ID photo is deleted the moment you're approved."
-          />
-          <Step
-            n="02"
-            icon={<Camera className="size-5" />}
-            title="Snap it, set the date"
-            body="Photograph the item in the app — no stock images. Tell us when you're vacating and you get a price in seconds."
-          />
-          <Step
-            n="03"
-            icon={<MapPin className="size-5" />}
-            title="Meet on campus"
-            body="Pick a pre-approved spot on your campus. Hand over in person, in daylight, where people are around."
-          />
+      <section className="border-hairline bg-ink-raised border-y">
+        <div className="mx-auto w-full max-w-7xl px-5 py-16 md:px-8 md:py-20">
+          <h2 className="font-display max-w-2xl text-3xl md:text-4xl">How a sale works</h2>
+          <ol className="mt-10 grid gap-8 md:grid-cols-4">
+            <Step
+              n={1}
+              icon={<ShieldCheck className="size-5" />}
+              title="Verify once"
+              body="College email plus a photo of your ID, checked by a person. The photo is deleted after review."
+            />
+            <Step
+              n={2}
+              icon={<Camera className="size-5" />}
+              title="Snap and describe"
+              body="Take photos or a short video in the app. Add what's included and any flaws."
+            />
+            <Step
+              n={3}
+              icon={<Sparkles className="size-5" />}
+              title="Get a price"
+              body="The AI explains what your item is worth, then the price adjusts to how soon you move out."
+            />
+            <Step
+              n={4}
+              icon={<PackageCheck className="size-5" />}
+              title="We deliver, you get paid"
+              body="A delivery partner collects from your hostel. You're paid once the buyer confirms receipt."
+            />
+          </ol>
         </div>
       </section>
 
-      <section className="bg-paper text-ink px-6 py-20 md:px-16 md:py-28">
-        <div className="mx-auto flex w-full max-w-[1400px] flex-wrap items-center justify-between gap-10">
-          <h2 className="font-display max-w-2xl text-5xl md:text-7xl">
-            Your room empties either way.
-          </h2>
-          <Link href="/signup">
-            <Button
-              size="lg"
-              className="bg-ink text-paper hover:bg-ink-raised rounded-full whitespace-nowrap"
-            >
-              Start selling
-              <ArrowRight className="size-4" />
-            </Button>
-          </Link>
-        </div>
-        <div className="mx-auto mt-16 flex w-full max-w-[1400px] flex-wrap justify-between gap-4 border-t border-black/15 pt-7 text-[13px] text-black/60">
-          <span>ReWyse — built by students at IIIT Delhi</span>
-          <span>Verified students only. Every handover happens on campus.</span>
-        </div>
-      </section>
+      <footer className="mx-auto flex w-full max-w-7xl flex-wrap justify-between gap-4 px-5 py-10 text-[13px] md:px-8">
+        <span className="text-paper-dim">ReWyse, built by students at IIIT Delhi</span>
+        <span className="text-paper-faint">No commission for sellers</span>
+      </footer>
     </main>
-  );
-}
-
-function Stat({ value, label, flame }: { value: string; label: string; flame?: boolean }) {
-  return (
-    <div>
-      <dt className={`font-display text-4xl ${flame ? 'text-flame' : ''}`}>{value}</dt>
-      <dd className="text-paper-dim mt-1.5 text-[13px]">{label}</dd>
-    </div>
   );
 }
 
@@ -163,61 +106,65 @@ function Step({
   title,
   body,
 }: {
-  n: string;
+  n: number;
   icon: React.ReactNode;
   title: string;
   body: string;
 }) {
   return (
-    <div className="border-hairline bg-surface hover:border-flame-edge rounded-2xl border p-8 transition-transform duration-300 hover:-translate-y-1.5">
-      <div className="text-flame flex items-center gap-3">
-        <span className="font-display text-sm tracking-[0.12em]">{n}</span>
+    <li>
+      <div className="text-paper-dim flex items-center gap-3">
+        <span className="border-hairline-strong text-paper flex size-8 items-center justify-center rounded-full border text-sm font-semibold">
+          {n}
+        </span>
         {icon}
       </div>
-      <h3 className="font-display mt-5 text-2xl">{title}</h3>
-      <p className="text-paper-dim mt-3 text-[15px] leading-relaxed">{body}</p>
-    </div>
+      <h3 className="mt-4 text-lg font-semibold">{title}</h3>
+      <p className="text-paper-dim mt-2 text-[15px] leading-relaxed">{body}</p>
+    </li>
   );
 }
 
-/** The signature artifact: the countdown the whole product is organised around. */
-function CountdownCard() {
+/** The product's idea in one picture: the same item, quoted at four distances from move-out. */
+function PriceDropCard() {
+  const rows = EXAMPLE_DAYS.map((days) => ({
+    days,
+    price: computeSuggestion({
+      baseValue: EXAMPLE_BASE,
+      functionalStatus: 'fully_working',
+      daysUntilMoveout: days,
+    }).sellFastPrice,
+  }));
+  const top = rows[0]!.price;
+
   return (
-    <aside className="border-hairline-strong bg-surface h-fit overflow-hidden rounded-3xl border">
-      <div className="border-hairline text-paper-dim flex items-center justify-between border-b px-6 py-4 text-xs font-semibold tracking-[0.14em] uppercase">
-        <span>Your move-out</span>
-        <span className="tracking-normal normal-case">14 May</span>
-      </div>
-
-      <div className="px-6 pt-9 pb-6 text-center">
-        <div className="font-display text-flame text-[8rem] leading-[0.8]">06</div>
-        <div className="text-paper-dim mt-4 text-[13px] font-semibold tracking-[0.2em] uppercase">
-          days left
-        </div>
-      </div>
-
-      <div className="px-6 pb-6">
-        <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
-          <div className="from-flame to-flame-amber h-full w-[72%] bg-gradient-to-r" />
-        </div>
-      </div>
-
-      <div className="border-hairline border-t p-6">
-        <p className="text-paper-dim text-xs font-semibold tracking-[0.14em] uppercase">
-          Dell 24&quot; Monitor
-        </p>
-        <div className="mt-4 flex items-baseline justify-between">
-          <span className="text-paper-dim text-sm">Fair range</span>
-          <span className="text-paper-faint text-[15px] line-through">₹5,100 – ₹6,300</span>
-        </div>
-        <div className="mt-3 flex items-baseline justify-between">
-          <span className="text-sm font-semibold">Sell-fast price</span>
-          <span className="font-display text-flame text-3xl">₹3,750</span>
-        </div>
-        <div className="bg-flame-soft text-flame-bright mt-5 inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold">
-          Expected to sell within 48 hours
-        </div>
-      </div>
+    <aside
+      aria-label="Example: how the price of a monitor changes as move-out gets closer"
+      className="border-hairline-strong bg-ink-raised rounded-2xl border p-6"
+    >
+      <p className="font-medium">Dell 24&quot; monitor, fully working</p>
+      <p className="text-paper-dim mt-1 text-sm">Suggested quick-sale price</p>
+      <ul className="mt-6 space-y-4">
+        {rows.map((r) => {
+          const urgent = r.days <= 5;
+          return (
+            <li key={r.days}>
+              <div className="flex items-baseline justify-between text-sm">
+                <span className={urgent ? 'text-flame-bright font-medium' : 'text-paper-dim'}>
+                  {r.days} days before move-out
+                </span>
+                <span className="text-base font-semibold">{formatINR(r.price)}</span>
+              </div>
+              <div className="bg-surface mt-2 h-2 overflow-hidden rounded-full">
+                <div
+                  className={urgent ? 'bg-flame h-full' : 'bg-paper-faint h-full'}
+                  style={{ width: `${Math.round((r.price / top) * 100)}%` }}
+                />
+              </div>
+            </li>
+          );
+        })}
+      </ul>
     </aside>
   );
 }

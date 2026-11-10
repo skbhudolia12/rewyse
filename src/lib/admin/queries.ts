@@ -21,7 +21,10 @@ export const PENDING_VERIFICATIONS_SELECT = `
 `;
 
 export const PAYMENTS_QUEUE_SELECT = `
-  id, amount, status, gateway_reference, buyer_confirmed_at, created_at, admin_note,
+  id, amount, item_amount, convenience_fee, delivery_fee, status, gateway_reference,
+  buyer_confirmed_at, created_at, admin_note, payment_method, delivery_status, delivery_address,
+  delivery_partner, rider_name, tracking_id, delivered_at, released_at, payout_reference,
+  payout_account_mask,
   listing:listings(title),
   buyer:profiles!payments_buyer_id_fkey(full_name, email),
   seller:profiles!payments_seller_id_fkey(full_name, email)

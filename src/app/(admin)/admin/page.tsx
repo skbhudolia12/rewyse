@@ -1,119 +1,107 @@
 import Link from 'next/link';
-import { IdCard, Wallet, Flag, Tag, LineChart } from 'lucide-react';
-import { Card, PageHeader } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
+import { formatINR } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
 /**
- * Admin home. Each tile shows the count that decides whether it needs opening,
- * so the queue that is backing up is visible without clicking into all of them.
+ * Operations overview: how the business is doing, then what needs a person.
+ *
+ * Revenue counts only orders that were paid and not refunded. An abandoned
+ * checkout never charged anyone, and a refunded one gave the money back.
  */
 export default async function AdminHomePage() {
   const admin = await requireAdmin();
   const supabase = await createClient();
 
-  const [ids, payments, reports, listings, events] = await Promise.all([
+  const [orders, boosts, ids, reports, listings] = await Promise.all([
+    supabase
+      .from('payments')
+      .select('status, item_amount, convenience_fee, delivery_fee, buyer_confirmed_at')
+      .in('status', ['held', 'released']),
+    supabase.from('boosts').select('amount, ends_at'),
     supabase.from('id_verifications').select('id').eq('status', 'pending_review'),
-    supabase.from('payments').select('id, buyer_confirmed_at').eq('status', 'held'),
     supabase.from('reports').select('id').eq('status', 'open'),
     supabase.from('listings').select('id').eq('status', 'active'),
-    supabase.from('pricing_events').select('id').not('outcome', 'is', null),
   ]);
 
-  const awaitingRelease = (payments.data ?? []).filter((p) => p.buyer_confirmed_at).length;
+  const paid = orders.data ?? [];
+  const sum = (xs: Array<Record<string, unknown>>, key: string) =>
+    xs.reduce((total, x) => total + Number(x[key] ?? 0), 0);
+
+  const convenience = sum(paid, 'convenience_fee');
+  const delivery = sum(paid, 'delivery_fee');
+  const boostRevenue = sum(boosts.data ?? [], 'amount');
+  const gmv = sum(paid, 'item_amount');
+  const now = new Date().getTime();
+  const liveBoosts = (boosts.data ?? []).filter((b) => new Date(b.ends_at as string).getTime() > now).length;
+  const readyToPay = paid.filter((p) => p.status === 'held' && p.buyer_confirmed_at).length;
+  const inDelivery = paid.filter((p) => p.status === 'held' && !p.buyer_confirmed_at).length;
 
   return (
-    <main className="mx-auto w-full max-w-3xl space-y-8 px-5 py-10">
-      <PageHeader
-        eyebrow="Admin"
-        title={`Hi, ${admin.full_name.split(' ')[0]}`}
-        subtitle="Everything that needs a person."
-      />
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Tile
-          href="/admin/verifications"
-          icon={<IdCard className="size-5" />}
-          title="ID verifications"
-          count={ids.data?.length ?? 0}
-          urgentAbove={0}
-          caption="Students waiting to be let in"
-        />
-        <Tile
-          href="/admin/payments"
-          icon={<Wallet className="size-5" />}
-          title="Escrow desk"
-          count={awaitingRelease}
-          urgentAbove={0}
-          caption={`${payments.data?.length ?? 0} in hold · ${awaitingRelease} ready to release`}
-        />
-        <Tile
-          href="/admin/reports"
-          icon={<Flag className="size-5" />}
-          title="Reports"
-          count={reports.data?.length ?? 0}
-          urgentAbove={0}
-          caption="Flagged listings and threads"
-        />
-        <Tile
-          href="/home"
-          icon={<Tag className="size-5" />}
-          title="Live listings"
-          count={listings.data?.length ?? 0}
-          urgentAbove={Number.POSITIVE_INFINITY}
-          caption="Active across the cluster"
-        />
-        <Tile
-          href="/admin/insights"
-          icon={<LineChart className="size-5" />}
-          title="Pilot results"
-          count={events.data?.length ?? 0}
-          urgentAbove={Number.POSITIVE_INFINITY}
-          caption="Does urgency pricing work?"
-        />
+    <main className="mx-auto w-full max-w-5xl space-y-8 px-4 py-6 md:px-8 md:py-8">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">Good to see you, {admin.full_name.split(' ')[0]}</h1>
+        <p className="text-paper-dim mt-1 text-sm">How the marketplace is doing, and what needs you.</p>
       </div>
 
-      <Card>
-        <p className="text-sm font-semibold">Payments are simulated</p>
-        <p className="text-paper-dim mt-1.5 text-[13px] leading-relaxed">
-          Releasing or refunding on the escrow desk records a decision and updates the listing. No
-          real money moves, and the flow is built so a licensed payment provider can replace the
-          simulation without a rewrite.
-        </p>
-      </Card>
+      <section aria-labelledby="revenue-heading" className="border-hairline bg-ink-raised rounded-xl border p-5 md:p-6">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 id="revenue-heading" className="text-paper-dim text-sm">
+              ReWyse revenue
+            </h2>
+            <p className="mt-1 text-[40px] leading-none font-semibold tracking-tight">
+              {formatINR(convenience + delivery + boostRevenue)}
+            </p>
+          </div>
+          <p className="text-paper-dim text-sm">
+            on {formatINR(gmv)} of items sold across {paid.length} {paid.length === 1 ? 'order' : 'orders'}
+          </p>
+        </div>
+        <dl className="mt-6 grid gap-3 sm:grid-cols-3">
+          <Revenue label="Convenience fees" value={convenience} note="3–5% of each order, paid by buyers" />
+          <Revenue label="Delivery fees" value={delivery} note="Charged per order for partner delivery" />
+          <Revenue label="Listing boosts" value={boostRevenue} note={`${liveBoosts} running now, paid by sellers`} />
+        </dl>
+      </section>
+
+      <section aria-labelledby="queue-heading">
+        <h2 id="queue-heading" className="mb-3 font-semibold">
+          Needs attention
+        </h2>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Queue href="/admin/payments" label="Sellers to pay" count={readyToPay} />
+          <Queue href="/admin/payments" label="Deliveries in progress" count={inDelivery} calm />
+          <Queue href="/admin/verifications" label="ID checks waiting" count={ids.data?.length ?? 0} />
+          <Queue href="/admin/reports" label="Open reports" count={reports.data?.length ?? 0} />
+        </div>
+        <p className="text-paper-faint mt-3 text-[13px]">{listings.data?.length ?? 0} listings live across the cluster.</p>
+      </section>
     </main>
   );
 }
 
-function Tile({
-  href,
-  icon,
-  title,
-  count,
-  caption,
-  urgentAbove,
-  disabled,
-}: {
-  href: string;
-  icon: React.ReactNode;
-  title: string;
-  count: number;
-  caption: string;
-  urgentAbove: number;
-  disabled?: boolean;
-}) {
-  const urgent = count > urgentAbove;
-  const body = (
-    <Card className={`h-full transition ${disabled ? 'opacity-50' : 'hover:border-flame-edge'}`}>
-      <div className="flex items-start justify-between">
-        <span className={urgent ? 'text-flame' : 'text-paper-dim'}>{icon}</span>
-        <span className={`font-display text-3xl ${urgent ? 'text-flame' : ''}`}>{count}</span>
-      </div>
-      <p className="mt-4 font-semibold">{title}</p>
-      <p className="text-paper-dim mt-1 text-[13px]">{disabled ? 'Phase 4' : caption}</p>
-    </Card>
+function Revenue({ label, value, note }: { label: string; value: number; note: string }) {
+  return (
+    <div className="border-hairline rounded-lg border px-4 py-3">
+      <dt className="text-paper-dim text-xs">{label}</dt>
+      <dd className="mt-1 text-xl font-semibold tracking-tight">{formatINR(value)}</dd>
+      <p className="text-paper-faint mt-1 text-xs">{note}</p>
+    </div>
   );
-  return disabled ? <div>{body}</div> : <Link href={href}>{body}</Link>;
+}
+
+function Queue({ href, label, count, calm }: { href: string; label: string; count: number; calm?: boolean }) {
+  const urgent = count > 0 && !calm;
+  return (
+    <Link href={href}>
+      <Card className="hover:border-hairline-strong h-full transition">
+        <p className={`text-3xl font-semibold tracking-tight ${urgent ? 'text-flame-bright' : ''}`}>{count}</p>
+        <p className="text-paper-dim mt-1 text-sm">{label}</p>
+      </Card>
+    </Link>
+  );
 }

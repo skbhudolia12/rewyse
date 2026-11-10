@@ -1,24 +1,14 @@
 import Link from 'next/link';
-import { MapPin, Plus, Search } from 'lucide-react';
-import { Badge, Card, Wordmark } from '@/components/ui';
+import { Plus } from 'lucide-react';
+import { Card } from '@/components/ui';
 import { ListingCard } from '@/components/listing-card';
+import { ListingGrid } from '@/components/listing-grid';
 import { requireVerified } from '@/lib/auth/session';
-import {
-  getCategoryCounts,
-  getClearanceListings,
-  getFeedListings,
-} from '@/lib/listings/queries';
+import { getClearanceListings, getFeedListings } from '@/lib/listings/queries';
+import { CATEGORY_LABELS } from '@/lib/listings/categories';
 import { LISTING_CATEGORIES, type ListingCategory } from '@/types/domain';
 
 export const dynamic = 'force-dynamic';
-
-const CATEGORY_LABELS: Record<ListingCategory, string> = {
-  electronics: 'Electronics',
-  furniture: 'Room furniture',
-  books: 'Study & books',
-  appliances: 'Appliances',
-  other: 'Everything else',
-};
 
 export default async function HomePage({
   searchParams,
@@ -27,138 +17,83 @@ export default async function HomePage({
 }) {
   const { category } = await searchParams;
   const profile = await requireVerified();
+  const viewerCampus = profile.campus?.abbreviation ?? '';
 
   const active = LISTING_CATEGORIES.includes(category as ListingCategory)
     ? (category as ListingCategory)
     : undefined;
 
-  const [clearance, listings, counts] = await Promise.all([
-    getClearanceListings(),
+  const [clearance, listings] = await Promise.all([
+    getClearanceListings(12),
     getFeedListings({ category: active }),
-    getCategoryCounts(),
   ]);
+  const now = new Date();
 
   return (
-    <main className="grid-paper min-h-full">
-      <header className="border-hairline bg-ink/90 sticky top-0 z-30 border-b backdrop-blur">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-5 py-4 md:px-10">
-          <div className="flex items-center gap-6">
-            <Wordmark />
-            <span className="border-hairline-strong text-paper-dim hidden items-center gap-2 rounded-full border px-3.5 py-1.5 text-[13px] font-medium sm:inline-flex">
-              <MapPin className="text-flame size-3.5" />
-              Delhi Cluster
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3">
+    <main className="mx-auto w-full max-w-7xl space-y-10 px-4 py-6 md:px-8 md:py-8">
+      {clearance.length > 0 && (
+        <section
+          aria-labelledby="clearance-heading"
+          className="bg-ink-raised border-hairline relative overflow-hidden rounded-2xl border"
+        >
+          <span className="bg-flame absolute inset-y-0 left-0 w-1" aria-hidden />
+          <div className="flex flex-wrap items-end justify-between gap-3 px-5 pt-5 md:px-7 md:pt-6">
+            <div>
+              <h2 id="clearance-heading" className="font-display text-2xl md:text-[28px]">
+                Leaving campus this week
+              </h2>
+              <p className="text-paper-dim mt-1.5 max-w-xl text-sm">
+                These sellers move out within 7 days, and their prices drop as the date gets
+                closer.
+              </p>
+            </div>
             <Link
-              href="/search"
-              className="border-hairline-strong text-paper-faint hover:text-paper hidden items-center gap-2.5 rounded-full border px-4 py-2 text-sm transition md:flex md:w-72"
+              href="/search?clearance=1"
+              className="text-flame-bright hover:text-flame text-sm font-medium"
             >
-              <Search className="size-4" />
-              Search your cluster…
+              See all
             </Link>
+          </div>
+          <div className="scrollbar-none flex snap-x scroll-px-5 gap-4 overflow-x-auto px-5 pt-5 pb-6 md:scroll-px-7 md:px-7">
+            {clearance.map((l) => (
+              <div key={l.id} className="w-44 shrink-0 snap-start md:w-52">
+                <ListingCard listing={l} viewerCampusAbbr={viewerCampus} now={now} />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section aria-labelledby="feed-heading">
+        <div className="mb-4 flex items-baseline justify-between gap-3">
+          <h2 id="feed-heading" className="text-lg font-semibold">
+            {active ? CATEGORY_LABELS[active] : 'Across the Delhi cluster'}
+          </h2>
+          <p className="text-paper-dim text-[13px]">
+            {listings.length} {listings.length === 1 ? 'item' : 'items'} from IIITD, IITD and DTU
+          </p>
+        </div>
+
+        {listings.length === 0 ? (
+          <Card className="py-14 text-center">
+            <p className="text-lg font-semibold">Nothing listed here yet</p>
+            <p className="text-paper-dim mx-auto mt-2 max-w-sm text-sm leading-relaxed">
+              {active
+                ? 'No one on your cluster is selling in this category right now.'
+                : 'List the first item. It takes about a minute, and the price is worked out for you.'}
+            </p>
             <Link
               href="/listing/new"
-              className="bg-flame text-ink hover:bg-flame-bright inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition"
+              className="bg-flame text-ink hover:bg-flame-bright mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg px-5 text-sm font-semibold transition"
             >
               <Plus className="size-4" />
-              Sell
+              List an item
             </Link>
-          </div>
-        </div>
-      </header>
-
-      <div className="mx-auto w-full max-w-6xl space-y-12 px-5 py-8 md:px-10">
-        {clearance.length > 0 && (
-          <section>
-            <div className="mb-5 flex flex-wrap items-baseline gap-3">
-              <span className="bg-flame pulse-dot mt-2 inline-block size-2 shrink-0 self-start rounded-full" />
-              <h2 className="font-display text-2xl">Move-out clearance</h2>
-              <p className="text-paper-dim text-[13px]">Sellers vacating within a week</p>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {clearance.slice(0, 4).map((l) => (
-                <ListingCard key={l.id} listing={l} />
-              ))}
-            </div>
-          </section>
+          </Card>
+        ) : (
+          <ListingGrid listings={listings} viewer={viewerCampus} now={now} />
         )}
-
-        <section>
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-wrap gap-2">
-              <CategoryChip label="Everything" href="/home" active={!active} />
-              {LISTING_CATEGORIES.map((c) => (
-                <CategoryChip
-                  key={c}
-                  label={CATEGORY_LABELS[c]}
-                  href={`/home?category=${c}`}
-                  active={active === c}
-                  count={counts[c] ?? 0}
-                />
-              ))}
-            </div>
-            <p className="text-paper-dim text-[13px]">
-              {listings.length} {listings.length === 1 ? 'listing' : 'listings'}
-            </p>
-          </div>
-
-          {listings.length === 0 ? (
-            <Card className="py-12 text-center">
-              <p className="font-display text-xl">Nothing here yet</p>
-              <p className="text-paper-dim mx-auto mt-2 max-w-sm text-sm leading-relaxed">
-                {active
-                  ? 'No listings in this category on your cluster right now.'
-                  : `Be the first. Your move-out date is set, so ${profile.full_name.split(' ')[0]}, you can list something in about a minute.`}
-              </p>
-              <Link
-                href="/listing/new"
-                className="bg-flame text-ink hover:bg-flame-bright mt-6 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition"
-              >
-                <Plus className="size-4" />
-                List something
-              </Link>
-            </Card>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {listings.map((l) => (
-                <ListingCard key={l.id} listing={l} />
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
+      </section>
     </main>
-  );
-}
-
-function CategoryChip({
-  label,
-  href,
-  active,
-  count,
-}: {
-  label: string;
-  href: string;
-  active: boolean;
-  count?: number;
-}) {
-  return (
-    <Link
-      href={href}
-      className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition ${
-        active
-          ? 'bg-paper text-ink border-paper font-semibold'
-          : 'border-hairline-strong text-paper-dim hover:border-paper hover:text-paper'
-      }`}
-    >
-      {label}
-      {count !== undefined && count > 0 && !active && (
-        <Badge tone="neutral" className="border-0 px-0 py-0 text-[10px]">
-          {count}
-        </Badge>
-      )}
-    </Link>
   );
 }

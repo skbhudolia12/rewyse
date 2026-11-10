@@ -9,10 +9,35 @@ import { z } from 'zod';
  * null rather than a guess.
  */
 
+/** One reasoning point, as shown to a seller. Long enough for a clause, short enough to scan. */
+export const MAX_POINT_LENGTH = 160;
+export const MIN_POINTS = 2;
+export const MAX_POINTS = 4;
+
+/**
+ * Letters, digits, ordinary punctuation and the rupee sign. A model will now
+ * and then emit a look-alike glyph where ₹ belongs (seen in eval: "‹3,000"),
+ * and that reaches a seller verbatim, so an answer containing one is rejected.
+ */
+const READABLE = /^[\p{L}\p{N}\s.,;:!?'"’‘“”()\-–—%/&+₹]+$/u;
+
+const point = z
+  .string()
+  .trim()
+  .min(8)
+  .max(MAX_POINT_LENGTH)
+  .regex(READABLE, 'reasoning contains an unexpected character');
+
 export const estimateSchema = z.object({
+  item_identified: z.string().trim().min(2).max(80),
   base_value_inr: z.number().finite().positive(),
   confidence: z.number().min(0).max(1),
-  reasoning: z.string().min(1).max(240),
+  // A model sometimes returns one more point than asked; keep the first four
+  // rather than discarding an otherwise good answer.
+  reasoning: z
+    .array(point)
+    .min(MIN_POINTS)
+    .transform((points) => points.slice(0, MAX_POINTS)),
 });
 
 export type Estimate = z.infer<typeof estimateSchema>;

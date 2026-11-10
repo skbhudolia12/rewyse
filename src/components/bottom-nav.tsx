@@ -29,7 +29,7 @@ export function BottomNav({ isAdmin, verified }: { isAdmin: boolean; verified: b
   return (
     <nav
       aria-label="Main"
-      className="border-hairline bg-surface/95 fixed inset-x-0 bottom-0 z-40 border-t backdrop-blur"
+      className="border-hairline bg-ink-raised/95 fixed inset-x-0 bottom-0 z-40 border-t backdrop-blur md:hidden"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
       <ul className="mx-auto flex max-w-md">

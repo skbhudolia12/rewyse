@@ -25,16 +25,16 @@ export function Button({
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-xl font-medium transition',
+        'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition',
         'focus-visible:ring-flame focus-visible:ring-offset-ink focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
         'disabled:cursor-not-allowed disabled:opacity-45',
         'active:translate-y-px',
-        size === 'lg' ? 'min-h-14 px-7 text-base' : 'min-h-11 px-5 text-sm',
+        size === 'lg' ? 'min-h-12 px-6 text-[15px]' : 'min-h-11 px-4 text-sm',
         variant === 'primary' && 'bg-paper text-ink hover:bg-paper-dim font-semibold',
         variant === 'flame' &&
-          'bg-flame text-ink hover:bg-flame-bright font-semibold shadow-[0_8px_24px_rgba(255,90,31,0.28)]',
+          'bg-flame text-ink hover:bg-flame-bright font-semibold',
         variant === 'secondary' &&
-          'border-hairline-strong text-paper hover:border-paper border bg-transparent',
+          'border-hairline-strong text-paper hover:bg-surface hover:border-paper-faint border bg-transparent',
         variant === 'ghost' && 'text-paper-dim hover:text-paper bg-transparent',
         variant === 'danger' && 'bg-danger text-ink font-semibold hover:brightness-110',
         className,
@@ -48,7 +48,7 @@ export function Input({ className, ...props }: ComponentProps<'input'>) {
   return (
     <input
       className={cn(
-        'border-hairline-strong text-paper min-h-12 w-full rounded-xl border bg-transparent px-4',
+        'border-hairline-strong text-paper bg-ink min-h-12 w-full rounded-lg border px-4',
         'placeholder:text-paper-faint',
         'focus:border-flame focus:ring-flame/25 focus:ring-2 focus:outline-none',
         'disabled:text-paper-dim disabled:cursor-not-allowed disabled:opacity-60',
@@ -64,7 +64,7 @@ export function Textarea({ className, ...props }: ComponentProps<'textarea'>) {
   return (
     <textarea
       className={cn(
-        'border-hairline-strong text-paper min-h-24 w-full rounded-xl border bg-transparent px-4 py-3',
+        'border-hairline-strong text-paper bg-ink min-h-24 w-full rounded-lg border px-4 py-3',
         'placeholder:text-paper-faint',
         'focus:border-flame focus:ring-flame/25 focus:ring-2 focus:outline-none',
         className,
@@ -78,7 +78,7 @@ export function Select({ className, children, ...props }: ComponentProps<'select
   return (
     <select
       className={cn(
-        'border-hairline-strong text-paper bg-ink min-h-12 w-full rounded-xl border px-3.5',
+        'border-hairline-strong text-paper bg-ink min-h-12 w-full rounded-lg border px-3.5',
         'focus:border-flame focus:ring-flame/25 focus:ring-2 focus:outline-none',
         className,
       )}
@@ -124,7 +124,7 @@ export function Field({
 export function Card({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
-      className={cn('border-hairline bg-surface rounded-2xl border p-5', className)}
+      className={cn('border-hairline bg-ink-raised rounded-xl border p-5', className)}
       {...props}
     />
   );
@@ -140,7 +140,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold',
+        'inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold',
         tone === 'neutral' && 'border-hairline-strong text-paper-dim border',
         tone === 'verify' && 'bg-verify-soft text-verify',
         tone === 'flame' && 'bg-flame-soft text-flame-bright',
@@ -209,7 +209,7 @@ export function Alert({
     <div
       role={tone === 'error' ? 'alert' : 'status'}
       className={cn(
-        'rounded-xl border px-4 py-3.5 text-sm leading-relaxed',
+        'rounded-lg border px-4 py-3.5 text-sm leading-relaxed',
         tone === 'error' && 'border-danger/40 bg-danger-soft text-danger',
         tone === 'info' && 'border-hairline-strong bg-surface text-paper-dim',
         tone === 'success' && 'border-verify/35 bg-verify-soft text-verify',
@@ -232,10 +232,8 @@ export function PageHeader({
 }) {
   return (
     <header className="space-y-2">
-      {eyebrow && (
-        <p className="text-flame text-xs font-semibold tracking-[0.16em] uppercase">{eyebrow}</p>
-      )}
-      <h1 className="font-display text-4xl">{title}</h1>
+      {eyebrow && <p className="text-paper-dim text-sm font-medium">{eyebrow}</p>}
+      <h1 className="font-display text-3xl md:text-4xl">{title}</h1>
       {subtitle && <p className="text-paper-dim max-w-prose text-[15px] leading-relaxed">{subtitle}</p>}
     </header>
   );
@@ -249,4 +247,9 @@ export function Wordmark({ className }: { className?: string }) {
       <span className="bg-flame inline-block size-1.5 rounded-full" />
     </span>
   );
+}
+
+/** Grey shimmer block for loading states, sized by the caller. */
+export function Skeleton({ className }: { className?: string }) {
+  return <div aria-hidden className={cn('bg-surface animate-pulse rounded-lg', className)} />;
 }

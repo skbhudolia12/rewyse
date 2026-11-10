@@ -1,99 +1,131 @@
 import Link from 'next/link';
-import { Search } from 'lucide-react';
-import { Card, PageHeader } from '@/components/ui';
-import { ListingCard } from '@/components/listing-card';
+import { Card } from '@/components/ui';
+import { ListingGrid } from '@/components/listing-grid';
 import { requireVerified } from '@/lib/auth/session';
 import { getFeedListings } from '@/lib/listings/queries';
+import { CATEGORY_LABELS } from '@/lib/listings/categories';
+import { cn } from '@/lib/utils';
 import { LISTING_CATEGORIES, type ListingCategory } from '@/types/domain';
 
 export const dynamic = 'force-dynamic';
 
-const CATEGORY_LABELS: Record<ListingCategory, string> = {
-  electronics: 'Electronics',
-  furniture: 'Room furniture',
-  books: 'Study & books',
-  appliances: 'Appliances',
-  other: 'Everything else',
-};
+function searchHref(params: {
+  q?: string | undefined;
+  category?: string | undefined;
+  clearance?: boolean;
+}): string {
+  const sp = new URLSearchParams();
+  if (params.q) sp.set('q', params.q);
+  if (params.category) sp.set('category', params.category);
+  if (params.clearance) sp.set('clearance', '1');
+  const qs = sp.toString();
+  return qs ? `/search?${qs}` : '/search';
+}
 
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; category?: string }>;
+  searchParams: Promise<{ q?: string; category?: string; clearance?: string }>;
 }) {
-  const { q, category } = await searchParams;
-  await requireVerified();
+  const { q, category, clearance } = await searchParams;
+  const profile = await requireVerified();
 
   const active = LISTING_CATEGORIES.includes(category as ListingCategory)
     ? (category as ListingCategory)
     : undefined;
   const query = q?.trim() || undefined;
+  const clearanceOnly = clearance === '1';
 
-  const listings = await getFeedListings({ category: active, query });
+  const listings = await getFeedListings({ category: active, query, clearanceOnly });
+
+  const heading = query
+    ? `Results for “${query}”`
+    : clearanceOnly
+      ? 'Sellers leaving this week'
+      : active
+        ? CATEGORY_LABELS[active]
+        : 'Everything on your cluster';
 
   return (
-    <main className="mx-auto w-full max-w-6xl space-y-8 px-5 py-8 md:px-10">
-      <PageHeader title="Explore" subtitle="Everything live across IIITD, IITD and DTU." />
-
-      {/* A GET form: the query lives in the URL, so a search is shareable and
-          the back button does what a student expects. */}
-      <form action="/search" className="space-y-4">
-        <div className="border-hairline-strong focus-within:border-flame flex items-center gap-3 rounded-xl border px-4 transition">
-          <Search className="text-paper-dim size-4 shrink-0" />
-          <input
-            name="q"
-            defaultValue={query ?? ''}
-            placeholder="Monitors, desks, textbooks…"
-            className="text-paper placeholder:text-paper-faint min-h-12 w-full bg-transparent focus:outline-none"
-          />
-        </div>
-        {active && <input type="hidden" name="category" value={active} />}
-      </form>
+    <main className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 md:px-8 md:py-8">
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <h1 className="text-2xl font-semibold tracking-tight">{heading}</h1>
+        <p className="text-paper-dim text-[13px]">
+          {listings.length} {listings.length === 1 ? 'item' : 'items'}
+        </p>
+      </div>
 
       <div className="flex flex-wrap gap-2">
-        <Chip label="Everything" href={query ? `/search?q=${encodeURIComponent(query)}` : '/search'} active={!active} />
+        <Chip
+          label="All categories"
+          href={searchHref({ q: query, clearance: clearanceOnly })}
+          active={!active}
+        />
         {LISTING_CATEGORIES.map((c) => (
           <Chip
             key={c}
             label={CATEGORY_LABELS[c]}
-            href={`/search?category=${c}${query ? `&q=${encodeURIComponent(query)}` : ''}`}
+            href={searchHref({ q: query, category: c, clearance: clearanceOnly })}
             active={active === c}
           />
         ))}
+        <Chip
+          label="Leaving this week"
+          href={searchHref({ q: query, category: active, clearance: !clearanceOnly })}
+          active={clearanceOnly}
+          flame
+        />
       </div>
 
       {listings.length === 0 ? (
-        <Card className="py-12 text-center">
-          <p className="font-display text-xl">No matches</p>
-          <p className="text-paper-dim mt-2 text-sm">
-            {query ? `Nothing matching "${query}" on your cluster.` : 'Nothing in this category yet.'}
+        <Card className="py-14 text-center">
+          <p className="text-lg font-semibold">No items match</p>
+          <p className="text-paper-dim mx-auto mt-2 max-w-sm text-sm">
+            {query
+              ? `Nothing on your cluster matches “${query}”. Try a shorter word, or clear the filters.`
+              : 'Nothing listed with these filters yet.'}
           </p>
+          <Link
+            href="/search"
+            className="text-flame-bright hover:text-flame mt-5 inline-block text-sm font-medium"
+          >
+            Clear filters
+          </Link>
         </Card>
       ) : (
-        <>
-          <p className="text-paper-dim text-[13px]">
-            {listings.length} {listings.length === 1 ? 'result' : 'results'}
-          </p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {listings.map((l) => (
-              <ListingCard key={l.id} listing={l} />
-            ))}
-          </div>
-        </>
+        <ListingGrid
+          listings={listings}
+          viewer={profile.campus?.abbreviation ?? ''}
+          now={new Date()}
+        />
       )}
     </main>
   );
 }
 
-function Chip({ label, href, active }: { label: string; href: string; active: boolean }) {
+function Chip({
+  label,
+  href,
+  active,
+  flame,
+}: {
+  label: string;
+  href: string;
+  active: boolean;
+  flame?: boolean;
+}) {
   return (
     <Link
       href={href}
-      className={`rounded-full border px-4 py-2 text-sm transition ${
+      aria-current={active ? 'page' : undefined}
+      className={cn(
+        'inline-flex min-h-9 items-center rounded-full border px-3.5 text-[13px] transition',
         active
-          ? 'bg-paper text-ink border-paper font-semibold'
-          : 'border-hairline-strong text-paper-dim hover:border-paper hover:text-paper'
-      }`}
+          ? flame
+            ? 'border-flame bg-flame-soft text-flame-bright font-medium'
+            : 'border-paper bg-paper text-ink font-medium'
+          : 'border-hairline-strong text-paper-dim hover:text-paper hover:border-paper-faint',
+      )}
     >
       {label}
     </Link>

@@ -20,7 +20,7 @@ export default async function InsightsPage() {
   const data = await getInsights();
 
   return (
-    <main className="mx-auto w-full max-w-3xl space-y-8 px-5 py-10">
+    <main className="mx-auto w-full max-w-5xl space-y-8 px-4 py-6 md:px-8 md:py-8">
       <PageHeader
         eyebrow="Pilot"
         title="Does urgency pricing work?"
@@ -139,7 +139,7 @@ export default async function InsightsPage() {
 function Hero({ rate, accepted, decided }: { rate: number; accepted: number; decided: number }) {
   return (
     <Card className="space-y-3">
-      <p className="text-paper-dim text-xs font-semibold tracking-[0.14em] uppercase">
+      <p className="text-paper-dim text-sm">
         Took the sell-fast price
       </p>
       <p className="font-display text-flame text-7xl">{pct(rate)}</p>
@@ -215,7 +215,7 @@ function Stat({
 }) {
   return (
     <Card>
-      <p className="text-paper-dim text-[11px] font-semibold tracking-[0.13em] uppercase">
+      <p className="text-paper-dim text-xs">
         {label}
       </p>
       <p className="font-display mt-2 text-3xl">{value}</p>

@@ -5,7 +5,7 @@ import type { ListingCategory, FunctionalStatus } from '@/types/domain';
  * pilot's acceptance-rate data can be segmented before and after a tuning pass
  * instead of being silently blended into one misleading average.
  */
-export const PROMPT_VERSION = 'v1';
+export const PROMPT_VERSION = 'v2';
 
 /**
  * Functional condition is the only deterministic multiplier. Cosmetic flaws are

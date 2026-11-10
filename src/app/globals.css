@@ -15,26 +15,29 @@
 */
 
 @theme {
-  --color-ink: #0a0a0b;
-  --color-ink-raised: #141416;
-  --color-paper: #f4f1ec;
-  --color-paper-dim: #cfcac1;
-  --color-paper-faint: #7d7970;
+  /* Graphite rather than pure black: long sessions on a product grid read
+     calmer on a lifted dark, and photos keep their contrast against it. */
+  --color-ink: #111214;
+  --color-ink-raised: #17191c;
+  --color-ink-elevated: #1e2024;
+  --color-paper: #ecebe7;
+  --color-paper-dim: #b0ada6;
+  --color-paper-faint: #85827b;
 
-  --color-flame: #ff5a1f;
-  --color-flame-bright: #ff7a45;
+  --color-flame: #ff6b2c;
+  --color-flame-bright: #ff8549;
   --color-flame-amber: #ffa11f;
-  --color-flame-soft: rgba(255, 90, 31, 0.14);
-  --color-flame-edge: rgba(255, 90, 31, 0.45);
+  --color-flame-soft: rgba(255, 107, 44, 0.12);
+  --color-flame-edge: rgba(255, 107, 44, 0.4);
 
-  --color-hairline: rgba(244, 241, 236, 0.14);
-  --color-hairline-strong: rgba(244, 241, 236, 0.24);
-  --color-surface: rgba(244, 241, 236, 0.03);
+  --color-hairline: rgba(236, 235, 231, 0.09);
+  --color-hairline-strong: rgba(236, 235, 231, 0.18);
+  --color-surface: rgba(236, 235, 231, 0.035);
 
-  --color-verify: #6ee7a8;
-  --color-verify-soft: rgba(110, 231, 168, 0.14);
+  --color-verify: #5fd39b;
+  --color-verify-soft: rgba(95, 211, 155, 0.12);
   --color-danger: #ff6b5e;
-  --color-danger-soft: rgba(255, 107, 94, 0.14);
+  --color-danger-soft: rgba(255, 107, 94, 0.12);
 
   --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
@@ -80,25 +83,11 @@
 @layer utilities {
   .font-display {
     font-family: var(--font-display);
-    font-weight: 800;
-    letter-spacing: -0.045em;
-    line-height: 0.92;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
   }
 
-  /* Campus notebook. Barely there by design — texture, not decoration. */
-  .grid-paper {
-    background-image:
-      linear-gradient(var(--color-hairline) 1px, transparent 1px),
-      linear-gradient(90deg, var(--color-hairline) 1px, transparent 1px);
-    background-size: 56px 56px;
-  }
-
-  .grid-paper-tight {
-    background-image:
-      linear-gradient(var(--color-hairline) 1px, transparent 1px),
-      linear-gradient(90deg, var(--color-hairline) 1px, transparent 1px);
-    background-size: 44px 44px;
-  }
 
   .pb-safe {
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
@@ -106,6 +95,20 @@
 
   .pb-nav {
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--spacing-nav) + 1rem);
+  }
+
+  /* Desktop navigates from the header; the bottom bar is phone-only. */
+  @media (min-width: 768px) {
+    .pb-nav {
+      padding-bottom: 3rem;
+    }
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
   }
 
   .pulse-dot {
@@ -122,15 +125,4 @@
     }
   }
 
-  .ticker-track {
-    display: flex;
-    width: max-content;
-    animation: ticker-slide 26s linear infinite;
-  }
-
-  @keyframes ticker-slide {
-    to {
-      transform: translateX(-50%);
-    }
-  }
 }

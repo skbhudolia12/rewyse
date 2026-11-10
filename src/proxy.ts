@@ -13,7 +13,7 @@ import { NextResponse, type NextRequest } from 'next/server';
  * route around.
  */
 
-const PUBLIC_PATHS = ['/', '/login', '/signup', '/auth'];
+const PUBLIC_PATHS = ['/', '/login', '/signup', '/auth', '/demo'];
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some(

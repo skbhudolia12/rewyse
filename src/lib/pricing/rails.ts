@@ -162,3 +162,32 @@ export function isHighLiquidity(askingPrice: number, suggestion: PriceSuggestion
 export function isWithinFairRange(askingPrice: number, suggestion: PriceSuggestion): boolean {
   return askingPrice >= suggestion.fairMin && askingPrice <= suggestion.fairMax;
 }
+
+/**
+ * Plain-language account of what the move-out date did to the price.
+ *
+ * Written by code, not the model: these sentences quote exact numbers from the
+ * rails, and a model paraphrasing them would eventually get one wrong.
+ */
+export function explainUrgency(
+  days: number,
+  suggestion: PriceSuggestion,
+  patientSellFast: number,
+): string[] {
+  if (days >= URGENCY_WINDOW_DAYS) {
+    return [
+      `You have ${days} days before move-out, so there is no urgency discount yet.`,
+      'If you wait until the final week, the quick-sale price will start to drop.',
+    ];
+  }
+
+  const discount = Math.round((1 - suggestion.sellFastPrice / suggestion.fairMin) * 100);
+  const when = days === 0 ? 'today' : days === 1 ? 'tomorrow' : `in ${days} days`;
+
+  return [
+    discount > 0
+      ? `You move out ${when}, so the quick-sale price is ${discount}% below the fair range.`
+      : `You move out ${when}; the quick-sale price matches the bottom of the fair range.`,
+    `With 3 or more weeks to go, the same item would be quoted at ₹${patientSellFast.toLocaleString('en-IN')}.`,
+  ];
+}

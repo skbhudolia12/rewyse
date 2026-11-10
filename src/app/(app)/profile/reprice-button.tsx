@@ -21,7 +21,7 @@ function RunButton({ label }: { label: string }) {
     <Button type="submit" variant="secondary" className="w-full" disabled={pending}>
       {pending ? (
         <>
-          <Loader2 className="size-4 animate-spin" /> Checking…
+          <Loader2 className="size-4 animate-spin" /> Checking
         </>
       ) : (
         <>
@@ -54,13 +54,13 @@ export function RepriceButton({ listingId }: { listingId: string }) {
 
     return (
       <Card className="border-flame-edge space-y-3">
-        <p className="text-paper-dim text-[11px] font-semibold tracking-[0.13em] uppercase">
+        <p className="text-paper-dim text-[13px]">
           {suggestion.days} {suggestion.days === 1 ? 'day' : 'days'} to move-out
         </p>
 
         {alreadyThere ? (
           <p className="text-[13px] leading-relaxed">
-            You&rsquo;re already at or below the sell-fast price of{' '}
+            You&rsquo;re already at or below the quick-sale price of{' '}
             <span className="font-semibold">{formatINR(suggestion.sellFast)}</span>. Nothing to drop.
           </p>
         ) : (
@@ -69,12 +69,12 @@ export function RepriceButton({ listingId }: { listingId: string }) {
               <span className="text-paper-faint text-lg line-through">
                 {formatINR(suggestion.current)}
               </span>
-              <span className="font-display text-flame text-3xl">
+              <span className="text-flame-bright text-2xl font-semibold tracking-tight">
                 {formatINR(suggestion.sellFast)}
               </span>
             </div>
             <p className="text-paper-dim text-[13px] leading-relaxed">
-              {formatINR(saving)} less. At this price it typically sells within 48 hours.
+              {formatINR(saving)} less: the quick-sale price for {suggestion.days} days before move-out.
             </p>
             <form action={formAction}>
               <input type="hidden" name="listingId" value={listingId} />
@@ -92,7 +92,7 @@ export function RepriceButton({ listingId }: { listingId: string }) {
   return (
     <form action={formAction}>
       <input type="hidden" name="listingId" value={listingId} />
-      <RunButton label="Drop price with Smart Price" />
+      <RunButton label="Check quick-sale price" />
       {state.error && <Alert tone="error">{state.error}</Alert>}
     </form>
   );

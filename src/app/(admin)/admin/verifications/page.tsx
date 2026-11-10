@@ -55,7 +55,7 @@ export default async function VerificationQueuePage() {
   );
 
   return (
-    <main className="mx-auto w-full max-w-2xl space-y-6 px-5 py-8 pb-safe">
+    <main className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6 md:px-8 md:py-8">
       <PageHeader
         title="ID verification queue"
         subtitle={
@@ -87,7 +87,7 @@ export default async function VerificationQueuePage() {
 
       <p className="text-xs text-paper-dim">
         Every signup lands here. If this queue grows faster than it is cleared, it becomes the
-        limit on the pilot&rsquo;s growth — not the product.
+        limit on growth — not the product.
       </p>
     </main>
   );

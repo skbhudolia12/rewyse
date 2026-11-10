@@ -20,7 +20,8 @@
     "make-admin": "node scripts/make-admin.mjs",
     "check:llm": "node scripts/check-llm.mjs",
     "demo:login": "node scripts/demo-login.mjs",
-    "seed:demo": "node scripts/seed-demo.mjs"
+    "seed:demo": "node scripts/seed-demo.mjs",
+    "eval:pricing": "vitest run --config vitest.eval.mts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

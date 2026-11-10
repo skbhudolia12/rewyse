@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import { CheckCircle2, PlayCircle } from 'lucide-react';
-import { Badge } from '@/components/ui';
+import { Check, Play } from 'lucide-react';
 import { formatINR } from '@/lib/utils';
+import { deliveryEta, formatEta } from '@/lib/delivery';
 import type { FeedListing } from '@/lib/listings/queries';
 
 /**
@@ -22,7 +22,7 @@ function Placeholder({ category }: { category: string }) {
   return (
     <svg
       viewBox="0 0 80 76"
-      className="text-flame/70 size-20"
+      className="text-paper-faint size-16"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.6"
@@ -35,71 +35,94 @@ function Placeholder({ category }: { category: string }) {
   );
 }
 
-export function ListingCard({ listing }: { listing: FeedListing }) {
+export function ListingCard({
+  listing,
+  viewerCampusAbbr,
+  now = new Date(),
+}: {
+  listing: FeedListing;
+  viewerCampusAbbr?: string;
+  now?: Date;
+}) {
+  const sameCampus = viewerCampusAbbr === listing.campusAbbr;
+  const showFairMax =
+    listing.suggestedMax !== null && listing.suggestedMax > listing.askingPrice;
+
   return (
     <Link
       href={`/listing/${listing.id}`}
-      className={`group block overflow-hidden rounded-2xl border transition duration-300 hover:-translate-y-1.5 ${
-        listing.isClearance
-          ? 'border-flame-edge bg-gradient-to-br from-[rgba(255,90,31,0.1)] to-transparent hover:border-flame'
-          : 'border-hairline bg-surface hover:border-flame-edge'
-      }`}
+      className="group focus-visible:ring-flame block rounded-xl focus-visible:ring-2 focus-visible:outline-none"
     >
-      <div className="border-hairline relative flex aspect-[4/3] items-center justify-center overflow-hidden border-b">
+      <div className="bg-ink-elevated relative flex aspect-square items-center justify-center overflow-hidden rounded-xl">
         {listing.imageUrl ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={listing.imageUrl}
-            alt={listing.title}
-            className="size-full object-cover transition duration-500 group-hover:scale-105"
+            alt=""
+            loading="lazy"
+            className="size-full object-cover transition duration-300 group-hover:scale-[1.03]"
           />
         ) : (
           <Placeholder category={listing.category} />
         )}
 
-        {listing.isClearance && (
-          <span className="bg-flame text-ink absolute top-3 left-3 rounded-full px-2.5 py-1 text-[10px] font-bold tracking-[0.04em]">
-            {listing.daysLeft === 0 ? 'TODAY' : `${listing.daysLeft} DAYS`}
-          </span>
-        )}
-
-        <div className="absolute top-3 right-3 flex gap-1.5">
+        <div className="absolute inset-x-2.5 top-2.5 flex items-start justify-between gap-2">
+          {listing.isBoosted ? (
+            <span className="bg-ink/80 text-paper-dim rounded-md px-2 py-1 text-[11px] font-medium backdrop-blur">
+              Sponsored
+            </span>
+          ) : (
+            <span />
+          )}
           {listing.hasVideo && (
-            <span className="bg-ink/75 text-paper flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-semibold">
-              <PlayCircle className="size-3" />
+            <span className="bg-ink/80 text-paper flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium backdrop-blur">
+              <Play className="size-3 fill-current" />
               Video
             </span>
           )}
         </div>
+
+        {listing.isClearance && (
+          <span className="bg-flame text-ink absolute bottom-2.5 left-2.5 rounded-md px-2 py-1 text-[11px] font-semibold">
+            {listing.daysLeft === 0
+              ? 'Seller leaves today'
+              : listing.daysLeft === 1
+                ? 'Seller leaves tomorrow'
+                : `Seller leaves in ${listing.daysLeft} days`}
+          </span>
+        )}
       </div>
 
-      <div className="p-4">
-        <div className="flex items-baseline justify-between gap-2">
-          <span className={`font-display text-2xl ${listing.isClearance ? 'text-flame' : ''}`}>
+      <div className="px-0.5 pt-3">
+        <p className="group-hover:text-flame-bright line-clamp-2 min-h-[2.5rem] text-sm leading-5 font-medium transition">
+          {listing.title}
+        </p>
+
+        <div className="mt-1.5 flex items-baseline gap-2">
+          <span className="text-xl font-semibold tracking-tight">
             {formatINR(listing.askingPrice)}
           </span>
-          <span className="border-hairline text-paper-dim shrink-0 rounded-full border px-2 py-0.5 text-[10px]">
-            {listing.condition}
-          </span>
+          {showFairMax && (
+            <span className="text-paper-faint text-xs">
+              Fair <s>{formatINR(listing.suggestedMax!)}</s>
+            </span>
+          )}
         </div>
 
-        <p className="mt-2 truncate text-sm font-medium">{listing.title}</p>
+        <p className="text-paper-dim mt-1 text-xs">
+          {listing.condition} · {listing.campusAbbr}
+        </p>
 
-        <div className="text-paper-dim mt-3 flex items-center gap-1.5 text-[11px]">
-          <CheckCircle2 className="text-flame size-3 shrink-0" />
-          <span>{listing.campusAbbr}</span>
-          <span className="text-paper-faint">·</span>
-          <span className="truncate">
-            {listing.daysLeft === 0 ? 'moving out today' : `${listing.daysLeft} days left`}
-          </span>
-        </div>
+        <p className="text-paper-dim mt-1 text-xs">
+          Get it by{' '}
+          <span className="text-paper font-medium">{formatEta(deliveryEta(now, sameCampus))}</span>
+        </p>
 
         {listing.isFairPrice && (
-          <div className="mt-3">
-            <Badge tone="verify" className="text-[10px]">
-              Fair price
-            </Badge>
-          </div>
+          <p className="text-verify mt-1.5 flex items-center gap-1 text-xs font-medium">
+            <Check className="size-3.5" />
+            Fair price
+          </p>
         )}
       </div>
     </Link>

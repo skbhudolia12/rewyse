@@ -25,8 +25,15 @@ async function notify(userId: string, type: string, payload: Record<string, unkn
   await admin.from('notifications').insert({ user_id: userId, type, payload });
 }
 
-/** Opens (or reuses) the buyer's thread on a listing. */
-export async function openConversation(listingId: string): Promise<void> {
+/**
+ * Opens (or resumes) the buyer's thread on a listing. `intent: 'offer'` lands
+ * the buyer with the offer form already open, so "Make an offer" on the
+ * listing page is one tap rather than two.
+ */
+export async function openConversation(
+  listingId: string,
+  intent: 'chat' | 'offer' = 'chat',
+): Promise<void> {
   const buyer = await requireVerified();
   const supabase = await createClient();
 
@@ -46,7 +53,8 @@ export async function openConversation(listingId: string): Promise<void> {
     .eq('buyer_id', buyer.id)
     .maybeSingle();
 
-  if (existing) redirect(`/messages/${existing.id}`);
+  const suffix = intent === 'offer' ? '?offer=1' : '';
+  if (existing) redirect(`/messages/${existing.id}${suffix}`);
 
   const { data: created, error } = await supabase
     .from('conversations')
@@ -57,7 +65,7 @@ export async function openConversation(listingId: string): Promise<void> {
   if (error || !created) redirect(`/listing/${listingId}?error=chat_failed`);
 
   await notify(listing.seller_id, 'conversation_opened', { listingId, conversationId: created.id });
-  redirect(`/messages/${created.id}`);
+  redirect(`/messages/${created.id}${suffix}`);
 }
 
 const messageInput = z.object({
@@ -225,90 +233,6 @@ export async function respondToOffer(
         ? 'Offer accepted. The buyer can now pay at that price.'
         : 'Offer declined.',
   };
-}
-
-const meetupInput = z.object({
-  conversationId: z.string().uuid(),
-  meetupPointId: z.string().uuid(),
-  proposedTime: z.string().min(1, 'Pick a time.'),
-});
-
-export async function proposeMeetup(
-  _prev: ThreadActionState,
-  formData: FormData,
-): Promise<ThreadActionState> {
-  const me = await requireVerified();
-  const parsed = meetupInput.safeParse({
-    conversationId: formData.get('conversationId'),
-    meetupPointId: formData.get('meetupPointId'),
-    proposedTime: formData.get('proposedTime'),
-  });
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Could not propose.' };
-
-  const when = new Date(parsed.data.proposedTime);
-  if (Number.isNaN(when.getTime())) return { error: 'That time is not valid.' };
-  if (when.getTime() < Date.now() - 60_000) return { error: 'Pick a time in the future.' };
-
-  const supabase = await createClient();
-  const { error } = await supabase.from('meetup_proposals').insert({
-    conversation_id: parsed.data.conversationId,
-    proposed_by: me.id,
-    meetup_point_id: parsed.data.meetupPointId,
-    proposed_time: when.toISOString(),
-  });
-  if (error) return { error: error.message.replace(/^.*?:\s*/, '') };
-
-  await supabase
-    .from('conversations')
-    .update({ status: 'meetup_proposed' })
-    .eq('id', parsed.data.conversationId);
-
-  const { data: conv } = await supabase
-    .from('conversations')
-    .select('buyer_id, seller_id')
-    .eq('id', parsed.data.conversationId)
-    .maybeSingle();
-
-  if (conv) {
-    const other = conv.buyer_id === me.id ? conv.seller_id : conv.buyer_id;
-    await notify(other, 'meetup_proposed', { conversationId: parsed.data.conversationId });
-  }
-
-  revalidatePath(`/messages/${parsed.data.conversationId}`);
-  return {};
-}
-
-export async function acceptMeetup(
-  _prev: ThreadActionState,
-  formData: FormData,
-): Promise<ThreadActionState> {
-  await requireVerified();
-  const id = z.string().uuid().safeParse(formData.get('meetupId'));
-  if (!id.success) return { error: 'That meetup could not be found.' };
-
-  const supabase = await createClient();
-  const { data: meetup } = await supabase
-    .from('meetup_proposals')
-    .select('id, conversation_id')
-    .eq('id', id.data)
-    .maybeSingle();
-  if (!meetup) return { error: 'That meetup could not be found.' };
-
-  const { error } = await supabase
-    .from('meetup_proposals')
-    .update({ accepted_at: new Date().toISOString() })
-    .eq('id', meetup.id);
-
-  if (error) {
-    return {
-      error: /other person has to accept/i.test(error.message)
-        ? 'You proposed this meetup — the other person has to accept it.'
-        : `Could not confirm: ${error.message}`,
-    };
-  }
-
-  revalidatePath(`/messages/${meetup.conversation_id}`);
-  return { message: 'Meetup confirmed. The item is reserved for you.' };
 }
 
 const reportInput = z.object({

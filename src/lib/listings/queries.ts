@@ -30,6 +30,7 @@ export interface FeedListing {
   hasVideo: boolean;
   isFairPrice: boolean;
   isClearance: boolean;
+  isBoosted: boolean;
 }
 
 interface RawListing {
@@ -58,8 +59,26 @@ const SELECT = `
   listing_media(storage_path, kind, position)
 `;
 
+/** Listings with a boost running right now. Read under RLS, so only visible listings count. */
+async function activeBoosts(ids: string[], now: Date): Promise<Set<string>> {
+  if (ids.length === 0) return new Set();
+  const supabase = await createClient();
+  const at = now.toISOString();
+  const { data } = await supabase
+    .from('boosts')
+    .select('listing_id')
+    .in('listing_id', ids)
+    .lte('starts_at', at)
+    .gt('ends_at', at);
+  return new Set((data ?? []).map((b) => b.listing_id as string));
+}
+
 async function decorate(rows: RawListing[], now: Date): Promise<FeedListing[]> {
   const supabase = await createClient();
+  const boosted = await activeBoosts(
+    rows.map((r) => r.id),
+    now,
+  );
 
   return Promise.all(
     rows.map(async (row) => {
@@ -95,6 +114,7 @@ async function decorate(rows: RawListing[], now: Date): Promise<FeedListing[]> {
           row.asking_price >= row.suggested_price_min &&
           row.asking_price <= row.suggested_price_max,
         isClearance: daysLeft <= CLEARANCE_WINDOW_DAYS,
+        isBoosted: boosted.has(row.id),
       };
     }),
   );
@@ -121,12 +141,17 @@ export async function getClearanceListings(limit = 8, now = new Date()): Promise
 /**
  * The main grid.
  *
- * Video-verified listings rank above photo-only ones, per the spec: a seller
- * who filmed the item powering on has given a materially stronger signal than
- * one who did not, and the feed should pay them back for it.
+ * Ranking: paid boosts first, then video-verified listings (a seller who
+ * filmed the item working has given a stronger signal than a photo), then the
+ * soonest move-out.
  */
 export async function getFeedListings(
-  opts: { category?: ListingCategory | undefined; query?: string | undefined; limit?: number } = {},
+  opts: {
+    category?: ListingCategory | undefined;
+    query?: string | undefined;
+    clearanceOnly?: boolean;
+    limit?: number;
+  } = {},
   now = new Date(),
 ): Promise<FeedListing[]> {
   const supabase = await createClient();
@@ -134,12 +159,19 @@ export async function getFeedListings(
   let q = supabase.from('listings').select(SELECT).eq('status', 'active');
   if (opts.category) q = q.eq('category', opts.category);
   if (opts.query) q = q.ilike('title', `%${opts.query}%`);
+  if (opts.clearanceOnly) {
+    const cutoff = new Date(now.getTime() + CLEARANCE_WINDOW_DAYS * 86_400_000)
+      .toISOString()
+      .slice(0, 10);
+    q = q.lte('moveout_date', cutoff);
+  }
 
   const { data } = await q.order('created_at', { ascending: false }).limit(opts.limit ?? 48);
 
   const listings = await decorate((data ?? []) as unknown as RawListing[], now);
 
   return listings.sort((a, b) => {
+    if (a.isBoosted !== b.isBoosted) return a.isBoosted ? -1 : 1;
     if (a.hasVideo !== b.hasVideo) return a.hasVideo ? -1 : 1;
     return a.daysLeft - b.daysLeft;
   });

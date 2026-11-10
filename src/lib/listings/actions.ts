@@ -37,7 +37,7 @@ export async function repriceListing(
   const { data: listing } = await supabase
     .from('listings')
     .select(
-      'id, seller_id, title, category, functional_status, cosmetic_flaws, accessories_included, moveout_date, asking_price, status',
+      'id, seller_id, title, description, category, functional_status, cosmetic_flaws, accessories_included, moveout_date, asking_price, status',
     )
     .eq('id', listingId.data)
     .maybeSingle();
@@ -52,6 +52,9 @@ export async function repriceListing(
     functionalStatus: listing.functional_status,
     cosmeticFlaws: listing.cosmetic_flaws,
     accessories: listing.accessories_included,
+    // Same identity fields as at creation, so repricing is a cache hit and
+    // never spends model quota.
+    description: listing.description,
     moveoutDate: listing.moveout_date,
     sellerId: me.id,
     listingId: listing.id,
@@ -192,4 +195,36 @@ export async function removeListing(
 
   revalidatePath('/profile');
   redirect('/profile');
+}
+
+const boostInput = z.object({
+  listingId: z.string().uuid(),
+  plan: z.enum(['boost_3d', 'boost_7d']),
+});
+
+export type BoostResult = { ok: true; endsAt: string } | { ok: false; error: string };
+
+/**
+ * Seller pays (simulated, via X-Pay) to feature a listing at the top of the feed.
+ * The database sets the price and the end date from the plan; this only says
+ * which plan.
+ */
+export async function boostListing(raw: unknown): Promise<BoostResult> {
+  const me = await requireVerified();
+  const parsed = boostInput.safeParse(raw);
+  if (!parsed.success) return { ok: false, error: 'Choose a boost plan.' };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('boosts')
+    .insert({ listing_id: parsed.data.listingId, seller_id: me.id, plan: parsed.data.plan })
+    .select('ends_at')
+    .single();
+
+  if (error || !data) return { ok: false, error: error?.message ?? 'The boost was not applied.' };
+
+  revalidatePath('/home');
+  revalidatePath('/profile');
+  revalidatePath(`/listing/${parsed.data.listingId}`);
+  return { ok: true, endsAt: data.ends_at };
 }

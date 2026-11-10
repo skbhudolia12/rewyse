@@ -1,5 +1,7 @@
 import { requireProfile } from '@/lib/auth/session';
 import { BottomNav } from '@/components/bottom-nav';
+import { SiteHeader } from '@/components/site-header';
+import { isDemoEmail } from '@/lib/demo';
 
 /**
  * Shell for signed-in students.
@@ -22,6 +24,15 @@ export default async function AppLayout({ children }: LayoutProps<'/'>) {
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
+      {showNav && (
+        <SiteHeader
+          firstName={profile.full_name.split(' ')[0] ?? 'Account'}
+          campusAbbr={profile.campus?.abbreviation ?? 'Delhi'}
+          isAdmin={isAdmin}
+          verified={verified}
+          isDemo={isDemoEmail(profile.email)}
+        />
+      )}
       <div className={showNav ? 'flex-1 pb-nav' : 'flex-1'}>{children}</div>
       {showNav && <BottomNav isAdmin={isAdmin} verified={verified} />}
     </div>

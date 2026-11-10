@@ -17,6 +17,8 @@ const quoteInput = z.object({
   functionalStatus: z.enum(FUNCTIONAL_STATUSES),
   cosmeticFlaws: z.string().trim().max(200).optional(),
   accessories: z.string().trim().max(200).optional(),
+  description: z.string().trim().max(1200).optional(),
+  photoPath: z.string().min(1).max(300).optional(),
   moveoutDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
 });
 
@@ -41,6 +43,8 @@ export async function quoteAction(raw: unknown): Promise<QuoteResult> {
       ...parsed.data,
       cosmeticFlaws: parsed.data.cosmeticFlaws ?? null,
       accessories: parsed.data.accessories ?? null,
+      description: parsed.data.description ?? null,
+      photoPath: parsed.data.photoPath ?? null,
       sellerId: profile.id,
     });
     return { ok: true, quote };
@@ -52,8 +56,10 @@ export async function quoteAction(raw: unknown): Promise<QuoteResult> {
   }
 }
 
-const createInput = quoteInput.extend({
-  description: z.string().trim().max(1200).optional(),
+/** One short clip per listing; it is a trust signal, not a gallery. */
+const MAX_VIDEOS = 1;
+
+const createInput = quoteInput.omit({ photoPath: true }).extend({
   askingPrice: z.coerce.number().int().min(0).max(500_000),
   media: z
     .array(
@@ -64,7 +70,10 @@ const createInput = quoteInput.extend({
       }),
     )
     .min(1, 'Add at least one photo.')
-    .max(6),
+    .max(6)
+    .refine((m) => m.filter((x) => x.kind === 'video').length <= MAX_VIDEOS, {
+      message: 'Add one video at most.',
+    }),
 });
 
 /**
@@ -112,6 +121,8 @@ export async function createListingAction(
     functionalStatus: input.functionalStatus,
     cosmeticFlaws: input.cosmeticFlaws ?? null,
     accessories: input.accessories ?? null,
+    description: input.description ?? null,
+    photoPath: input.media.find((m) => m.kind === 'photo')?.path ?? null,
     moveoutDate: input.moveoutDate,
     sellerId: profile.id,
   });
@@ -131,6 +142,8 @@ export async function createListingAction(
       suggested_price_min: quote.fairMin,
       suggested_price_max: quote.fairMax,
       suggested_sell_fast_price: quote.sellFastPrice,
+      // Shown to buyers as "How this price was set"; the item's value, not the urgency maths.
+      price_reasoning: quote.reasoning,
       asking_price: input.askingPrice,
       status: 'active',
       published_at: new Date().toISOString(),

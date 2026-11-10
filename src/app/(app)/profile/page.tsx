@@ -1,13 +1,31 @@
 import Link from 'next/link';
-import { CheckCircle2, Clock, Plus, Tag } from 'lucide-react';
-import { Badge, Button, Card, DaysLeft } from '@/components/ui';
+import { Check, Plus } from 'lucide-react';
+import { Button, Card, DaysLeft } from '@/components/ui';
+import { BoostButton } from '@/components/boost-button';
 import { requireVerified } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
-import { formatINR } from '@/lib/utils';
+import { cn, formatINR } from '@/lib/utils';
 import { daysUntilMoveout } from '@/lib/pricing/rails';
 import { RepriceButton } from './reprice-button';
 
 export const dynamic = 'force-dynamic';
+
+const SIGNED_URL_TTL_SECONDS = 3600;
+
+const STATUS_LABELS: Record<string, string> = {
+  active: 'Live',
+  pending_pickup: 'Sold, awaiting delivery',
+  completed: 'Sold',
+  removed: 'Removed',
+};
+
+const OFFER_LABELS: Record<string, string> = {
+  pending: 'Waiting for the seller',
+  accepted: 'Accepted',
+  rejected: 'Declined',
+  countered: 'Countered',
+  expired: 'Expired',
+};
 
 export default async function ProfilePage({
   searchParams,
@@ -17,168 +35,206 @@ export default async function ProfilePage({
   const { tab } = await searchParams;
   const me = await requireVerified();
   const supabase = await createClient();
+  const now = new Date();
 
   const showOffers = tab === 'offers';
 
-  const [listingsRes, offersRes, conversationsRes] = await Promise.all([
+  const [listingsRes, offersRes, payoutsRes] = await Promise.all([
     supabase
       .from('listings')
-      .select('id, title, asking_price, status, moveout_date, suggested_sell_fast_price')
+      .select(
+        'id, title, asking_price, status, moveout_date, suggested_sell_fast_price, listing_media(storage_path, kind, position), boosts(ends_at)',
+      )
       .eq('seller_id', me.id)
+      .neq('status', 'removed')
       .order('created_at', { ascending: false }),
     supabase
       .from('offers')
-      .select('id, amount, status, listing_id, conversation_id, created_at, listing:listings(title)')
+      .select('id, amount, status, conversation_id, listing:listings(title)')
       .eq('buyer_id', me.id)
       .order('created_at', { ascending: false }),
-    supabase
-      .from('conversations')
-      .select('id, status, buyer_id, seller_id, updated_at')
-      .or(`buyer_id.eq.${me.id},seller_id.eq.${me.id}`),
+    supabase.from('payments').select('item_amount').eq('seller_id', me.id).eq('status', 'released'),
   ]);
 
-  const listings = listingsRes.data ?? [];
+  type ListingRow = {
+    id: string;
+    title: string;
+    asking_price: number;
+    status: string;
+    moveout_date: string;
+    suggested_sell_fast_price: number | null;
+    listing_media: Array<{ storage_path: string; kind: string; position: number }> | null;
+    boosts: Array<{ ends_at: string }> | null;
+  };
+  const listings = (listingsRes.data ?? []) as unknown as ListingRow[];
   const offers = (offersRes.data ?? []) as unknown as Array<{
     id: string;
     amount: number;
     status: string;
-    listing_id: string;
     conversation_id: string;
     listing: { title: string } | null;
   }>;
 
-  const active = listings.filter((l) => l.status === 'active');
-  const sold = listings.filter((l) => l.status === 'completed');
-  const conversations = conversationsRes.data ?? [];
+  const thumbs = new Map<string, string | null>();
+  await Promise.all(
+    listings.map(async (l) => {
+      const cover = (l.listing_media ?? [])
+        .filter((m) => m.kind === 'photo')
+        .sort((a, b) => a.position - b.position)[0];
+      if (!cover) return thumbs.set(l.id, null);
+      const { data } = await supabase.storage
+        .from('listing-media')
+        .createSignedUrl(cover.storage_path, SIGNED_URL_TTL_SECONDS);
+      thumbs.set(l.id, data?.signedUrl ?? null);
+    }),
+  );
 
-  // Response time needs message timestamps we do not aggregate yet; showing a
-  // fabricated "15m" would be worse than showing nothing.
+  const sold = listings.filter((l) => l.status === 'completed' || l.status === 'pending_pickup');
+  const earned = (payoutsRes.data ?? []).reduce((sum, p) => sum + (p.item_amount as number), 0);
+  const myMoveout = daysUntilMoveout(me.moveout_date, now);
+
   const stats = [
-    { label: 'Items listed', value: String(listings.length) },
+    { label: 'Listed', value: String(listings.length) },
     { label: 'Sold', value: String(sold.length) },
-    { label: 'Campus trust', value: `${me.trust_score}%` },
+    { label: 'Earned', value: formatINR(earned) },
+    { label: 'Trust score', value: String(me.trust_score) },
   ];
 
-  const myMoveout = daysUntilMoveout(me.moveout_date, new Date());
-
   return (
-    <main className="mx-auto w-full max-w-2xl space-y-6 px-5 py-8">
-      <Card className="space-y-5">
-        <div className="flex items-start gap-4">
-          <div className="bg-paper text-ink flex size-14 shrink-0 items-center justify-center rounded-full text-xl font-bold">
+    <main className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 md:px-8 md:py-8">
+      <section className="border-hairline bg-ink-raised rounded-xl border p-5 md:p-6">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="bg-ink-elevated flex size-14 shrink-0 items-center justify-center rounded-full text-xl font-semibold">
             {me.full_name[0]}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <h1 className="truncate text-xl font-semibold">{me.full_name}</h1>
-              <CheckCircle2 className="text-verify size-4 shrink-0" />
-            </div>
-            <p className="text-paper-dim mt-1 truncate text-[13px]">
+            <h1 className="flex items-center gap-2 text-xl font-semibold">
+              <span className="truncate">{me.full_name}</span>
+              <Check className="text-verify size-4 shrink-0" aria-label="Verified student" />
+            </h1>
+            <p className="text-paper-dim mt-0.5 truncate text-sm">
               {me.campus?.name}
-              {me.hostel_or_hall ? ` · ${me.hostel_or_hall}` : ''}
+              {me.hostel_or_hall ? `, ${me.hostel_or_hall}` : ''}
             </p>
           </div>
-        </div>
-
-        <div className="border-hairline flex items-center justify-between border-t pt-4">
-          <div className="flex items-center gap-2">
-            <Clock className="text-paper-dim size-4" />
-            <span className="text-paper-dim text-[13px]">You move out in</span>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-paper-dim">You move out in</span>
+            <DaysLeft days={myMoveout} />
           </div>
-          <DaysLeft days={myMoveout} />
         </div>
 
-        <dl className="grid grid-cols-3 gap-3">
+        <dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {stats.map((s) => (
-            <div key={s.label} className="border-hairline bg-surface rounded-xl border p-3.5">
-              <dt className="text-paper-dim text-[11px] leading-tight">{s.label}</dt>
-              <dd className="font-display mt-1.5 text-2xl">{s.value}</dd>
+            <div key={s.label} className="border-hairline rounded-lg border px-4 py-3">
+              <dt className="text-paper-dim text-xs">{s.label}</dt>
+              <dd className="mt-1 text-xl font-semibold tracking-tight">{s.value}</dd>
             </div>
           ))}
         </dl>
-        <p className="text-paper-faint text-[11px] leading-relaxed">
-          Campus trust starts at 100 and moves with completed deals, cancelled meetups, and
-          reports an admin has actioned. It is a simple count, not a rating.
-        </p>
-      </Card>
+      </section>
 
-      <div className="flex gap-2">
-        <TabLink href="/profile" label="My listings" count={active.length} active={!showOffers} />
-        <TabLink href="/profile?tab=offers" label="My offers" count={offers.length} active={showOffers} />
+      <div className="border-hairline flex gap-6 border-b" role="tablist">
+        <TabLink href="/profile" label="Your listings" count={listings.length} active={!showOffers} />
+        <TabLink href="/profile?tab=offers" label="Your offers" count={offers.length} active={showOffers} />
       </div>
 
       {showOffers ? (
         offers.length === 0 ? (
-          <Empty
-            title="No offers yet"
-            body="When you offer on something, it shows up here so you can track it."
-          />
+          <Empty title="No offers yet" body="Offers you make on other students' items show up here." />
         ) : (
-          <div className="space-y-3">
+          <ul className="border-hairline divide-hairline divide-y overflow-hidden rounded-xl border">
             {offers.map((o) => (
-              <Link key={o.id} href={`/messages/${o.conversation_id}`} className="block">
-                <Card className="hover:border-flame-edge flex items-center justify-between gap-4 transition">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">{o.listing?.title ?? 'Listing'}</p>
-                    <p className="text-paper-dim mt-1 text-[12px] capitalize">{o.status}</p>
-                  </div>
-                  <span className="font-display shrink-0 text-xl">{formatINR(o.amount)}</span>
-                </Card>
-              </Link>
+              <li key={o.id}>
+                <Link
+                  href={`/messages/${o.conversation_id}`}
+                  className="bg-ink-raised hover:bg-ink-elevated flex items-center justify-between gap-4 px-5 py-4 transition"
+                >
+                  <span className="min-w-0">
+                    <span className="block truncate font-medium">{o.listing?.title ?? 'Listing'}</span>
+                    <span
+                      className={cn(
+                        'block text-[13px]',
+                        o.status === 'accepted' ? 'text-verify' : 'text-paper-dim',
+                      )}
+                    >
+                      {OFFER_LABELS[o.status] ?? o.status}
+                    </span>
+                  </span>
+                  <span className="shrink-0 font-semibold">{formatINR(o.amount)}</span>
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         )
       ) : listings.length === 0 ? (
         <Empty
           title="Nothing listed yet"
-          body="Your move-out date is already set, so listing something takes about a minute."
+          body="Take a photo, add a title, and the price is worked out for you."
           cta
         />
       ) : (
-        <div className="space-y-4">
+        <ul className="space-y-3">
           {listings.map((l) => {
-            const days = daysUntilMoveout(l.moveout_date, new Date());
+            const days = daysUntilMoveout(l.moveout_date, now);
+            const live = l.status === 'active';
+            const boostedUntil =
+              (l.boosts ?? [])
+                .map((b) => b.ends_at)
+                .filter((e) => new Date(e) > now)
+                .sort()
+                .at(-1) ?? null;
             const canReprice =
-              l.status === 'active' &&
-              l.suggested_sell_fast_price !== null &&
-              l.asking_price > l.suggested_sell_fast_price;
+              live && l.suggested_sell_fast_price !== null && l.asking_price > l.suggested_sell_fast_price;
+            const thumb = thumbs.get(l.id);
 
             return (
-              <Card key={l.id} className="space-y-4">
-                <div className="flex items-start justify-between gap-4">
-                  <Link href={`/listing/${l.id}`} className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{l.title}</p>
-                    <div className="mt-2 flex flex-wrap items-center gap-2">
-                      {l.status === 'active' ? (
-                        <DaysLeft days={days} size="sm" />
-                      ) : (
-                        <Badge tone="neutral">{l.status.replace('_', ' ')}</Badge>
-                      )}
-                    </div>
+              <li key={l.id} className="border-hairline bg-ink-raised rounded-xl border p-4">
+                <div className="flex gap-4">
+                  <Link href={`/listing/${l.id}`} className="bg-ink-elevated size-20 shrink-0 overflow-hidden rounded-lg">
+                    {thumb && (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={thumb} alt="" className="size-full object-cover" />
+                    )}
                   </Link>
-                  <span className="font-display shrink-0 text-2xl">{formatINR(l.asking_price)}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <Link href={`/listing/${l.id}`} className="hover:text-flame-bright line-clamp-2 font-medium">
+                        {l.title}
+                      </Link>
+                      <span className="shrink-0 font-semibold">{formatINR(l.asking_price)}</span>
+                    </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-[13px]">
+                      <span className={live ? 'text-verify' : 'text-paper-dim'}>{STATUS_LABELS[l.status]}</span>
+                      {live && <DaysLeft days={days} size="sm" />}
+                      {boostedUntil && <span className="text-paper-dim">· Sponsored</span>}
+                    </div>
+                  </div>
                 </div>
 
-                {canReprice && <RepriceButton listingId={l.id} />}
-
-                {l.status === 'active' && (
-                  <div className="flex gap-2">
-                    <Link href={`/listing/${l.id}/edit`} className="flex-1">
+                {live && (
+                  <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                    <BoostButton
+                      listingId={l.id}
+                      boostedUntil={boostedUntil}
+                      payer={{ name: me.full_name, email: me.email }}
+                    />
+                    {canReprice ? (
+                      <RepriceButton listingId={l.id} />
+                    ) : (
+                      <span className="hidden sm:block" />
+                    )}
+                    <Link href={`/listing/${l.id}/edit`}>
                       <Button variant="ghost" className="w-full">
                         Edit
                       </Button>
                     </Link>
                   </div>
                 )}
-              </Card>
+              </li>
             );
           })}
-        </div>
+        </ul>
       )}
-
-      <p className="text-paper-faint text-center text-[12px]">
-        {conversations.length} {conversations.length === 1 ? 'conversation' : 'conversations'}
-      </p>
     </main>
   );
 }
@@ -197,14 +253,15 @@ function TabLink({
   return (
     <Link
       href={href}
-      className={`flex-1 rounded-xl border px-4 py-3 text-center text-sm transition ${
-        active
-          ? 'bg-paper text-ink border-paper font-semibold'
-          : 'border-hairline-strong text-paper-dim hover:border-paper hover:text-paper'
-      }`}
+      role="tab"
+      aria-selected={active}
+      className={cn(
+        '-mb-px border-b-2 pb-3 text-sm transition',
+        active ? 'border-paper text-paper font-medium' : 'text-paper-dim hover:text-paper border-transparent',
+      )}
     >
       {label}
-      {count > 0 && <span className="ml-2 opacity-60">{count}</span>}
+      {count > 0 && <span className="text-paper-faint ml-1.5">{count}</span>}
     </Link>
   );
 }
@@ -212,16 +269,15 @@ function TabLink({
 function Empty({ title, body, cta }: { title: string; body: string; cta?: boolean }) {
   return (
     <Card className="py-12 text-center">
-      <Tag className="text-paper-faint mx-auto size-7" />
-      <p className="font-display mt-4 text-xl">{title}</p>
+      <p className="text-lg font-semibold">{title}</p>
       <p className="text-paper-dim mx-auto mt-2 max-w-xs text-sm leading-relaxed">{body}</p>
       {cta && (
         <Link
           href="/listing/new"
-          className="bg-flame text-ink hover:bg-flame-bright mt-6 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition"
+          className="bg-flame text-ink hover:bg-flame-bright mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg px-5 text-sm font-semibold transition"
         >
           <Plus className="size-4" />
-          List something
+          List an item
         </Link>
       )}
     </Card>

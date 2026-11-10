@@ -44,7 +44,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   const listings = theirs.filter((l) => ids.has(l.id));
 
   return (
-    <main className="mx-auto w-full max-w-4xl space-y-8 px-5 py-8 md:px-10">
+    <main className="mx-auto w-full max-w-5xl space-y-8 px-4 py-6 md:px-8 md:py-8">
       <Card className="flex items-center gap-5">
         <div className="bg-paper text-ink flex size-16 shrink-0 items-center justify-center rounded-full text-2xl font-bold">
           {profile.full_name[0]}
