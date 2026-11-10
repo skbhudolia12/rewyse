@@ -28,7 +28,7 @@ export function SiteHeader({
   return (
     <header className="border-hairline bg-ink/95 sticky top-0 z-40 border-b backdrop-blur">
       <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-x-5 gap-y-3 px-4 py-3 md:px-8 lg:flex-nowrap">
-        <Link href={verified ? '/home' : '/verify'} aria-label="ReWyse home" className="shrink-0">
+        <Link href={verified ? '/home' : '/verify'} aria-label="Dobara home" className="shrink-0">
           <Wordmark />
         </Link>
 

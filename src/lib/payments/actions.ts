@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/server';
 import { requireVerified, requireAdmin } from '@/lib/auth/session';
 
 /**
- * Simulated escrow with ReWyse-run delivery.
+ * Simulated escrow with Dobara-run delivery.
  *
  * NOTHING HERE MOVES REAL MONEY. There is no payment provider and no
  * settlement; every row is marked is_simulated in the database.

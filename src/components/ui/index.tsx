@@ -242,9 +242,19 @@ export function PageHeader({
 /** Wordmark. The dot is the only place flame appears as pure brand. */
 export function Wordmark({ className }: { className?: string }) {
   return (
-    <span className={cn('inline-flex items-baseline gap-2', className)}>
-      <span className="font-display text-xl tracking-[-0.06em]">ReWyse</span>
-      <span className="bg-flame inline-block size-1.5 rounded-full" />
+    <span className={cn('font-display inline-flex items-baseline text-[22px]', className)}>
+      <span className="sr-only">Dobara</span>
+      {/* "दो" + "bara": half Hindi, half English, read as one word -- "again". */}
+      <span
+        aria-hidden
+        lang="hi"
+        className="font-devanagari text-flame text-[1.08em] leading-none font-extrabold tracking-normal"
+      >
+        दो
+      </span>
+      <span aria-hidden className="ml-[0.03em] tracking-[-0.04em]">
+        bara
+      </span>
     </span>
   );
 }

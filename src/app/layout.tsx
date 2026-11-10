@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Bricolage_Grotesque, Instrument_Sans } from 'next/font/google';
+import { Bricolage_Grotesque, Instrument_Sans, Mukta } from 'next/font/google';
 import './globals.css';
 
 const bricolage = Bricolage_Grotesque({
@@ -14,12 +14,19 @@ const instrument = Instrument_Sans({
   weight: ['400', '500', '600'],
 });
 
+// Only the Devanagari half of the wordmark uses this, so only that subset ships.
+const mukta = Mukta({
+  variable: '--font-mukta',
+  subsets: ['devanagari'],
+  weight: ['800'],
+});
+
 export const metadata: Metadata = {
-  title: 'ReWyse — Sell it before you leave',
+  title: 'Dobara — Sell it before you leave',
   description:
     'A marketplace for verified students across IIIT Delhi, IIT Delhi and DTU. Prices that account for how close you are to move-out day.',
-  applicationName: 'ReWyse',
-  appleWebApp: { capable: true, title: 'ReWyse', statusBarStyle: 'black-translucent' },
+  applicationName: 'Dobara',
+  appleWebApp: { capable: true, title: 'Dobara', statusBarStyle: 'black-translucent' },
 };
 
 export const viewport: Viewport = {
@@ -33,7 +40,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="en" className={`${bricolage.variable} ${instrument.variable} h-full`}>
+    <html lang="en" className={`${bricolage.variable} ${instrument.variable} ${mukta.variable} h-full`}>
       <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );

@@ -262,5 +262,5 @@ export async function submitReport(
   });
   if (error) return { error: `Could not submit the report: ${error.message}` };
 
-  return { message: 'Reported. Someone on the ReWyse team will look at this.' };
+  return { message: 'Reported. Someone on the Dobara team will look at this.' };
 }

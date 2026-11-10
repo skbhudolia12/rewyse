@@ -29,7 +29,7 @@ export const DEMO_ROLES = {
     email: 'demo.ops@iiitd.ac.in',
     label: 'Operations',
     person: 'Kabir Sethi',
-    context: 'ReWyse team',
+    context: 'Dobara team',
     does: 'Move deliveries along, release payouts and see the revenue.',
     landing: '/admin',
   },

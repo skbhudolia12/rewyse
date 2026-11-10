@@ -31,7 +31,7 @@ export default async function VerifyPage() {
             subtitle="A reviewer could not confirm your student ID from the photo you sent."
           />
           <Alert tone="error" title="What to do next">
-            Email the ReWyse team from your college address and we will take another look. This is
+            Email the Dobara team from your college address and we will take another look. This is
             usually a blurry or cropped photo rather than anything wrong with your account.
           </Alert>
         </div>

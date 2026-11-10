@@ -70,7 +70,7 @@ export default async function OrderPage({
       {paid && isBuyer && (
         <div className="mb-5">
           <Alert tone="success" title="Order placed">
-            Your payment is held in ReWyse Escrow. A SwiftDrop rider will collect the item from{' '}
+            Your payment is held in Dobara Escrow. A SwiftDrop rider will collect the item from{' '}
             {sellerFirst}.
           </Alert>
         </div>
@@ -219,13 +219,13 @@ export default async function OrderPage({
                 <p className="text-paper-dim mt-1 text-[13px] leading-relaxed">
                   {payment.status === 'released'
                     ? `Sent to ${payment.payout_account_mask}.`
-                    : `Paid to your bank account once ${buyerFirst} confirms the item arrived. ReWyse charges sellers no commission.`}
+                    : `Paid to your bank account once ${buyerFirst} confirms the item arrived. Dobara charges sellers no commission.`}
                 </p>
               </>
             )}
             <p className="border-hairline text-paper-dim mt-4 flex gap-2 border-t pt-4 text-[13px]">
               <ShieldCheck className="text-verify size-4 shrink-0" />
-              Held in ReWyse Escrow until the buyer confirms.
+              Held in Dobara Escrow until the buyer confirms.
             </p>
           </section>
         </aside>
@@ -250,7 +250,7 @@ function activeHint(
     case 'confirmed':
       return who.isBuyer ? 'Check the item and confirm below.' : `Waiting for ${who.buyerFirst} to confirm.`;
     case 'paid_out':
-      return 'ReWyse releases the payment shortly after confirmation.';
+      return 'Dobara releases the payment shortly after confirmation.';
     default:
       return '';
   }

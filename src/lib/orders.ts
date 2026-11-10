@@ -26,7 +26,7 @@ export interface OrderStep {
 
 export function orderSteps(p: PaymentRow): OrderStep[] {
   return [
-    { key: 'paid', label: 'Paid, held in ReWyse Escrow', at: p.scheduled_at },
+    { key: 'paid', label: 'Paid, held in Dobara Escrow', at: p.scheduled_at },
     { key: 'picked_up', label: 'Picked up from the seller', at: p.picked_up_at },
     { key: 'out_for_delivery', label: 'Out for delivery', at: p.out_for_delivery_at },
     { key: 'delivered', label: 'Delivered', at: p.delivered_at },

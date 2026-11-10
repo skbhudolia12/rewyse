@@ -6,7 +6,7 @@ import { enterDemo } from './actions';
 import { EnterButton } from './enter-button';
 
 export const metadata: Metadata = {
-  title: 'Try ReWyse',
+  title: 'Try Dobara',
   description: 'Sign in as a sample seller, buyer or operations account.',
 };
 
@@ -29,11 +29,11 @@ export default async function DemoPage({
 
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 px-4 pt-8 pb-16 md:px-8 md:pt-12">
-      <Link href="/" aria-label="ReWyse home">
+      <Link href="/" aria-label="Dobara home">
         <Wordmark />
       </Link>
 
-      <h1 className="font-display mt-10 text-4xl leading-tight md:text-5xl">Try ReWyse</h1>
+      <h1 className="font-display mt-10 text-4xl leading-tight md:text-5xl">Try Dobara</h1>
       <p className="text-paper-dim mt-3 max-w-2xl text-[17px] leading-relaxed">
         Pick an account to try the marketplace. You can switch between them at any time from the
         header, so one window is enough to follow a sale from listing to payout.

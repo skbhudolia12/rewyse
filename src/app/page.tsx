@@ -40,7 +40,7 @@ export default async function LandingPage() {
           </p>
           <h1 className="font-display mt-5 text-5xl md:text-7xl">Sell it before you leave.</h1>
           <p className="text-paper-dim mt-6 max-w-xl text-lg leading-relaxed">
-            List your room stuff in a minute. ReWyse prices it for your move-out date, delivers it
+            List your room stuff in a minute. Dobara prices it for your move-out date, delivers it
             to the buyer, and holds the payment until they confirm it arrived as described.
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
@@ -93,7 +93,7 @@ export default async function LandingPage() {
       </section>
 
       <footer className="mx-auto flex w-full max-w-7xl flex-wrap justify-between gap-4 px-5 py-10 text-[13px] md:px-8">
-        <span className="text-paper-dim">ReWyse, built by students at IIIT Delhi</span>
+        <span className="text-paper-dim">Dobara, built by students at IIIT Delhi</span>
         <span className="text-paper-faint">No commission for sellers</span>
       </footer>
     </main>

@@ -1,7 +1,7 @@
-# ReWyse demo: setup and shot list
+# Dobara demo: setup and shot list
 
 Three people, one sale, end to end: a seller lists an item and the AI prices it,
-a buyer negotiates and pays into escrow, ReWyse delivers it, and operations pays
+a buyer negotiates and pays into escrow, Dobara delivers it, and operations pays
 the seller out. Every screen updates live, so all three panels can be on screen at once.
 
 ## Before recording (once)

@@ -300,7 +300,7 @@ export default async function ListingDetailPage({
                   <p className="flex gap-2.5">
                     <ShieldCheck className="text-verify size-4 shrink-0" />
                     <span className="text-paper-dim">
-                      <span className="text-paper font-medium">ReWyse Escrow.</span> Your payment
+                      <span className="text-paper font-medium">Dobara Escrow.</span> Your payment
                       is held until you confirm the item arrived as described.
                     </span>
                   </p>

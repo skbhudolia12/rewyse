@@ -76,7 +76,7 @@ export function ThreadView(props: ThreadProps) {
       <div className="border-hairline bg-ink-raised flex items-start gap-3 rounded-lg border px-4 py-3">
         <ShieldAlert className="text-flame-bright mt-0.5 size-4 shrink-0" />
         <p className="text-paper-dim text-[13px] leading-relaxed">
-          Pay only through ReWyse checkout, so your money stays in escrow until the item arrives.
+          Pay only through Dobara checkout, so your money stays in escrow until the item arrives.
           Never share bank details or OTPs in chat.
         </p>
       </div>
@@ -116,7 +116,7 @@ export function ThreadView(props: ThreadProps) {
             );
           }
 
-          // Meetups predate ReWyse delivery; old proposals are not shown.
+          // Meetups predate Dobara delivery; old proposals are not shown.
           return null;
         })}
         <div ref={bottom} />

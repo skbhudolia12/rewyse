@@ -1,12 +1,12 @@
 /**
- * ReWyse's revenue rules: what a buyer pays on top of the item, and what a
+ * Dobara's revenue rules: what a buyer pays on top of the item, and what a
  * seller pays to boost a listing.
  *
  * Pure functions, so the buy box, the checkout and the server all quote the
  * same number. The server recomputes on every checkout; a total that arrives
  * from the browser is never trusted.
  *
- * The seller always receives the full item price. ReWyse earns from the
+ * The seller always receives the full item price. Dobara earns from the
  * buyer's convenience and delivery fees and from optional seller boosts.
  */
 

@@ -8,7 +8,7 @@ import { cn, formatINR } from '@/lib/utils';
  * X-Pay: a stand-in payment gateway.
  *
  * Styled as a separate company's product -- light, its own blue -- because a
- * real gateway is one, and the handover from ReWyse to the gateway and back is
+ * real gateway is one, and the handover from Dobara to the gateway and back is
  * part of what the demo shows. No card or UPI detail entered here goes
  * anywhere; the caller's onPay records only which method was used.
  */
@@ -94,7 +94,7 @@ export function XPaySheet({
                   R
                 </span>
                 <span>
-                  <span className="block text-sm font-semibold">ReWyse</span>
+                  <span className="block text-sm font-semibold">Dobara</span>
                   <span className="block text-[11px] text-white/60">Campus marketplace</span>
                 </span>
               </div>
@@ -252,9 +252,9 @@ export function XPaySheet({
               </span>
               <p className="mt-5 text-lg font-semibold">Payment successful</p>
               <p className="mt-1 text-sm text-slate-500">
-                {formatINR(amount)} paid to ReWyse
+                {formatINR(amount)} paid to Dobara
               </p>
-              <p className="mt-6 text-xs text-slate-400">Taking you back to ReWyse</p>
+              <p className="mt-6 text-xs text-slate-400">Taking you back to Dobara</p>
             </CenterState>
           )}
 

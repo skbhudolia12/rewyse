@@ -51,7 +51,7 @@ export default async function AdminHomePage() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h2 id="revenue-heading" className="text-paper-dim text-sm">
-              ReWyse revenue
+              Dobara revenue
             </h2>
             <p className="mt-1 text-[40px] leading-none font-semibold tracking-tight">
               {formatINR(convenience + delivery + boostRevenue)}

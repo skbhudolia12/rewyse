@@ -13,7 +13,7 @@ export default async function SignupPage() {
   return (
     <div className="space-y-8">
       <PageHeader
-        title="Join ReWyse"
+        title="Join Dobara"
         subtitle="Start with your college email. We verify every student before they can buy or sell."
       />
       <SignInForm submitLabel="Continue" domainHint={await getAllowedDomainHint()} />

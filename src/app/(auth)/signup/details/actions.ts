@@ -76,7 +76,7 @@ export async function completeSignup(
   const campusId = resolveCampusForEmail(user.email, (domains ?? []) as CampusDomain[]);
 
   if (!campusId) {
-    return { error: 'Your email is not on a recognised campus. Contact the ReWyse team.' };
+    return { error: 'Your email is not on a recognised campus. Contact the Dobara team.' };
   }
 
   // Upsert rather than insert. A student whose first attempt failed partway --

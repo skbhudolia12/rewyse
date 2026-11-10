@@ -120,7 +120,7 @@ export default async function ThreadPage({
         timeline={buildTimeline(
           (messages.data ?? []) as never,
           (offers.data ?? []) as never,
-          // Meetups predate ReWyse delivery and are no longer part of a thread.
+          // Meetups predate Dobara delivery and are no longer part of a thread.
           [],
         )}
         acceptedOfferId={acceptedOffer?.id ?? null}

@@ -167,7 +167,7 @@ export function DetailsForm({ email }: { email: string }) {
       <div className="bg-flame-soft border-flame-edge flex gap-3 rounded-xl border p-3.5">
         <ShieldCheck className="text-flame mt-0.5 size-5 shrink-0" />
         <p className="text-paper text-sm">
-          Only verified campus peers can message or buy. Your ID photo is visible to the ReWyse
+          Only verified campus peers can message or buy. Your ID photo is visible to the Dobara
           review team alone, and is deleted once your account is reviewed.
         </p>
       </div>

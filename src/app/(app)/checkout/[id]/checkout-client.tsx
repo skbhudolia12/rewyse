@@ -142,7 +142,7 @@ export function CheckoutClient({ order, item, buyer, eta }: Props) {
               <p className="flex gap-2.5">
                 <ShieldCheck className="text-verify size-4 shrink-0" />
                 <span className="text-paper-dim">
-                  Held in ReWyse Escrow. {item.sellerName.split(' ')[0]} is paid only after you
+                  Held in Dobara Escrow. {item.sellerName.split(' ')[0]} is paid only after you
                   confirm the item arrived as described.
                 </span>
               </p>

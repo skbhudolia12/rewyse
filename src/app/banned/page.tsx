@@ -5,10 +5,10 @@ export default function BannedPage() {
     <main className="mx-auto w-full max-w-md px-5 py-16 pb-safe">
       <PageHeader
         title="Account suspended"
-        subtitle="This account can no longer buy or sell on ReWyse."
+        subtitle="This account can no longer buy or sell on Dobara."
       />
       <p className="mt-4 text-sm text-paper-dim">
-        If you think this is a mistake, email the ReWyse team from your college address.
+        If you think this is a mistake, email the Dobara team from your college address.
       </p>
     </main>
   );

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
-  ReWyse design tokens — "Move-out season".
+  Dobara design tokens — "Move-out season".
 
   Dark-first by intent, not by preference: the product is a countdown, and the
   countdown reads on near-black. There is no light theme; a marketplace whose
@@ -41,6 +41,7 @@
 
   --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
+  --font-devanagari: var(--font-mukta), 'Nirmala UI', 'Kohinoor Devanagari', sans-serif;
 
   --spacing-nav: 4.5rem;
 }
