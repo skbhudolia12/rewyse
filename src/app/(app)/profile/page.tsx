@@ -107,7 +107,7 @@ export default async function ProfilePage({
           <div className="bg-ink-elevated flex size-14 shrink-0 items-center justify-center rounded-full text-xl font-semibold">
             {me.full_name[0]}
           </div>
-          <div className="min-w-0 flex-1">
+          <div className="min-w-[12rem] flex-1">
             <h1 className="flex items-center gap-2 text-xl font-semibold">
               <span className="truncate">{me.full_name}</span>
               <Check className="text-verify size-4 shrink-0" aria-label="Verified student" />
@@ -117,7 +117,7 @@ export default async function ProfilePage({
               {me.hostel_or_hall ? `, ${me.hostel_or_hall}` : ''}
             </p>
           </div>
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex w-full items-center gap-2 text-sm sm:w-auto">
             <span className="text-paper-dim">You move out in</span>
             <DaysLeft days={myMoveout} />
           </div>

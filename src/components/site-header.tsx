@@ -27,7 +27,7 @@ export function SiteHeader({
 }) {
   return (
     <header className="border-hairline bg-ink/95 sticky top-0 z-40 border-b backdrop-blur">
-      <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-x-5 gap-y-3 px-4 py-3 md:flex-nowrap md:px-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-x-5 gap-y-3 px-4 py-3 md:px-8 lg:flex-nowrap">
         <Link href={verified ? '/home' : '/verify'} aria-label="ReWyse home" className="shrink-0">
           <Wordmark />
         </Link>
@@ -44,7 +44,7 @@ export function SiteHeader({
           <form
             action="/search"
             role="search"
-            className="border-hairline-strong focus-within:border-flame bg-ink-raised order-last flex h-11 w-full overflow-hidden rounded-lg border transition md:order-none md:flex-1"
+            className="border-hairline-strong focus-within:border-flame bg-ink-raised order-last flex h-11 w-full overflow-hidden rounded-lg border transition lg:order-none lg:flex-1"
           >
             <label htmlFor="header-category" className="sr-only">
               Category
@@ -81,16 +81,6 @@ export function SiteHeader({
           </form>
         )}
 
-        {isDemo && (
-          <Link
-            href="/demo"
-            className="border-hairline-strong text-paper-dim hover:text-paper ml-auto flex h-9 shrink-0 items-center gap-1.5 rounded-lg border px-3 text-[13px] font-medium transition md:order-last md:ml-0"
-          >
-            <Repeat className="size-3.5" />
-            Switch role
-          </Link>
-        )}
-
         <nav aria-label="Account" className="ml-auto hidden items-center gap-1 md:flex">
           {verified && (
             <>
@@ -110,6 +100,16 @@ export function SiteHeader({
             <HeaderLink href="/profile" icon={<User className="size-4" />} label={firstName} />
           )}
         </nav>
+
+        {isDemo && (
+          <Link
+            href="/demo"
+            className="border-hairline-strong text-paper-dim hover:text-paper ml-auto flex h-9 shrink-0 items-center gap-1.5 rounded-lg border px-3 text-[13px] font-medium transition md:ml-0"
+          >
+            <Repeat className="size-3.5" />
+            Switch role
+          </Link>
+        )}
       </div>
 
       {verified && (
